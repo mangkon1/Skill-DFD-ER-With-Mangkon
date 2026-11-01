@@ -1,0 +1,16 @@
+{
+  "name": "skill-dfd-er-with-mangkon",
+  "owner": {
+    "name": "Mangkon"
+  },
+  "metadata": {
+    "description": "Skill ออกแบบ DFD และ ER Diagram ตามหลักข้อมูลต้องมีที่มาที่ไป"
+  },
+  "plugins": [
+    {
+      "name": "dfd-er-design",
+      "source": ".",
+      "description": "ออกแบบ DFD และ ER Diagram ตามหลักข้อมูลต้องมีที่มาที่ไป สำหรับเอกสารโครงงานวิจัย"
+    }
+  ]
+}

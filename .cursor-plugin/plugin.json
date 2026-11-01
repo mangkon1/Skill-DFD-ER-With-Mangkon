@@ -1,0 +1,20 @@
+{
+  "name": "dfd-er-design",
+  "displayName": "DFD ER Design",
+  "version": "1.0.0",
+  "description": "ออกแบบ DFD และ ER Diagram ตามหลักข้อมูลต้องมีที่มาที่ไป สำหรับเอกสารโครงงานวิจัย ใช้เมื่อต้องออกแบบ Data Flow Diagram, ER Diagram หรือตรวจความสอดคล้องของ Data Dictionary",
+  "author": {
+    "name": "Mangkon"
+  },
+  "repository": "https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon",
+  "homepage": "https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon",
+  "keywords": [
+    "dfd",
+    "er-diagram",
+    "data-dictionary",
+    "visio",
+    "skill"
+  ],
+  "category": "documentation",
+  "skills": "./skills/"
+}

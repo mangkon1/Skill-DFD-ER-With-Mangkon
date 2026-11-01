@@ -1,0 +1,10 @@
+{
+  "skill": "dfd-er-design",
+  "test_cases": [
+    {"input": "ออกแบบ DFD ให้หน่อย", "should_trigger": true},
+    {"input": "ช่วยวาด ER Diagram ตามหลักข้อมูลมีที่มาที่ไป", "should_trigger": true},
+    {"input": "ตรวจสอบเอกสารโครงงานบท 3", "should_trigger": true},
+    {"input": "ทำอาหารไทย", "should_trigger": false},
+    {"input": "เขียนโค้ด Python", "should_trigger": false}
+  ]
+}
