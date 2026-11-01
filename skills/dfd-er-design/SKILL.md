@@ -1,8 +1,10 @@
 ---
 name: dfd-er-design
 description: "ออกแบบ DFD และ ER Diagram ตามหลักข้อมูลต้องมีที่มาที่ไป สำหรับเอกสารโครงงานวิจัย. Use when designing Data Flow Diagrams, Entity-Relationship diagrams, data dictionaries, or checking research document consistency for Thai university projects."
-type: workflow
-lifecycle: active
+compatibility: Any agent that supports the Agent Skills standard. Drawing the diagrams requires Microsoft Visio.
+metadata:
+  author: mangkon
+  version: "1.0"
 ---
 
 # DFD & ER Design — ข้อมูลต้องมีที่มาที่ไป

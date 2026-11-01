@@ -1,26 +1,21 @@
 # Skill DFD ER With Mangkon
 
-Skill สำหรับออกแบบ Data Flow Diagram และ ER Diagram ตามหลักข้อมูลต้องมีที่มาที่ไป ใช้กับ Cursor และตัวช่วยเขียนโค้ดที่รองรับ Agent Skills
+Skill สำหรับออกแบบ Data Flow Diagram และ ER Diagram ตามหลักข้อมูลต้องมีที่มาที่ไป ใช้รูปแบบ [Agent Skills](https://agentskills.io) จึงติดตั้งจาก URL เดียวกันได้กับตัวช่วย AI ที่รองรับสกิล เช่น Cursor, Claude Code, Codex, Gemini CLI, GitHub Copilot, Windsurf, Cline และตัวอื่นที่ตัวติดตั้งรองรับ
 
-## ติดตั้งจาก URL
+## ติดตั้งให้ทุก AI
 
-คำสั่งนี้ติดตั้ง skill `dfd-er-design` ให้ Cursor ทั้งเครื่อง โดยไม่ต้องตอบคำถามเพิ่ม
+คำสั่งนี้ติดตั้ง skill `dfd-er-design` ทั้งเครื่อง ให้ทุกตัวช่วยที่ตรวจพบ โดยไม่ต้องตอบคำถามเพิ่ม
 
 ```bash
-npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill dfd-er-design -g -a cursor -y
+npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill dfd-er-design --agent '*' -g -y
 ```
 
 เปิดแชทใหม่หลังติดตั้ง แล้วบอกให้ช่วยออกแบบหรือตรวจ DFD, ER Diagram หรือ Data Dictionary
 
-ใน Cursor ติดตั้งจากหน้าจอได้เช่นกัน
-
-1. เปิด Customize
-2. เลือกนำเข้าจาก GitHub repository
-3. วาง `https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon`
-4. กดติดตั้ง plugin `dfd-er-design`
-
 ติดตั้งเฉพาะโปรเจกต์ปัจจุบัน โดยไม่ใส่ `-g`
 
 ```bash
-npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill dfd-er-design -a cursor -y
+npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill dfd-er-design --agent '*' -y
 ```
+
+ใน Cursor ติดตั้งจากหน้าจอได้เช่นกัน เปิด Customize แล้วเลือกนำเข้าจาก GitHub repository จากนั้นวาง `https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon` แล้วติดตั้ง plugin `dfd-er-design`
