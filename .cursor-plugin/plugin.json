@@ -1,8 +1,8 @@
 {
   "name": "dfd-er-design",
   "displayName": "DFD ER Design",
-  "version": "1.0.0",
-  "description": "ออกแบบ DFD และ ER Diagram ตามหลักข้อมูลต้องมีที่มาที่ไป สำหรับเอกสารโครงงานวิจัย ใช้เมื่อต้องออกแบบ Data Flow Diagram, ER Diagram หรือตรวจความสอดคล้องของ Data Dictionary",
+  "version": "2.0.0",
+  "description": "ออกแบบ วาด ตรวจ และใส่รูปเล่ม Context Diagram, DFD, ER Diagram, Data Dictionary และ MariaDB DDL ตามหลักข้อมูลต้องมีที่มาที่ไป สำหรับรายงานโครงงาน พร้อมแม่แบบ Visio และตัวสร้างรูป",
   "author": {
     "name": "Mangkon"
   },
@@ -13,7 +13,11 @@
     "er-diagram",
     "data-dictionary",
     "visio",
-    "skill"
+    "skill",
+    "context-diagram",
+    "crows-foot",
+    "mariadb",
+    "thai"
   ],
   "category": "documentation",
   "skills": "./skills/"
