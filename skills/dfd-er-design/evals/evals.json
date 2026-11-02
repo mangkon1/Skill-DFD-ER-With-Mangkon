@@ -4,17 +4,52 @@
     {
       "name": "design_new_dfd_er",
       "input": "ช่วยออกแบบ DFD และ ER สำหรับระบบจัดการสต็อกสินค้า",
-      "assertions": ["อธิบายหลักข้อมูลต้องมีที่มาที่ไป", "แนะนำใช้ Visio จากต้นฉบับ", "ตรวจสอบความสมดุลข้อมูล"]
+      "assertions": [
+        "อธิบายหลักข้อมูลต้องมีที่มาที่ไป",
+        "เรียง process แบบ Master → Transaction → Report",
+        "เริ่มจาก templates/generator/examples/spare_part.json หรือ templates/vsdx",
+        "ถามกฎธุรกิจ/cardinality ที่ไม่ชัด",
+        "มี CRUD matrix"
+      ]
     },
     {
       "name": "check_consistency",
       "input": "ตรวจสอบความสอดคล้องของ DFD กับ ER ของโครงงานฉัน",
-      "assertions": ["เช็คข้อมูลเข้า-ออกสมดุล", "เช็คเส้นไม่ตัดกัน", "เช็ค entity ไม่ซ้ำ"]
+      "assertions": [
+        "เช็คข้อมูลเข้า-ออกสมดุล (balancing)",
+        "เช็ค black hole / miracle / entity-store",
+        "เช็ค 1 เส้นต่อคู่ตารางใน ER",
+        "เช็ค FK ใน DD ตรงกับเส้น ER"
+      ]
     },
     {
       "name": "document_rules",
-      "input": "กฎการเขียนเอกสารโครงงานเรื่อง DFD ER มีอะไรบ้าง",
-      "assertions": ["กล่าวถึง Visio ต้นฉบับ", "ขนาดตัวอักษรและย่อหน้า", "สารบัญต้องอัปเดต"]
+      "input": "กฎการใส่รูป DFD ER ในรูปเล่มมีอะไรบ้าง",
+      "assertions": [
+        "caption รูปอยู่ใต้รูปรูปแบบ ภาพที่ 3.x",
+        "caption ตารางอยู่เหนือตาราง",
+        "หัวข้อ 18/16 pt ฟอนต์ TH SarabunPSK",
+        "ER หน้าแนวนอน",
+        "ส่วนนำเลขโรมัน สารบัญต้องอัปเดต"
+      ]
+    },
+    {
+      "name": "visio_white_box",
+      "input": "กล่อง process ใน Visio เป็นสีขาวบังตัวหนังสือ หัวตาราง ER ไม่มีสี",
+      "assertions": [
+        "อธิบาย DisplayMode ของ group",
+        "ตั้ง DisplayMode = 1 และ NoFill",
+        "หัว ER #BDD7EE",
+        "ตรวจด้วย check_vsdx.py"
+      ]
+    },
+    {
+      "name": "status_as_process",
+      "input": "ควรทำ process ส่งซ่อม กับ process ชำรุด แยกกันไหม",
+      "assertions": [
+        "สถานะเป็นข้อมูล ไม่ใช่ process",
+        "ใช้ process ปรับสถานะเดียว + ตาราง lookup"
+      ]
     }
   ]
 }

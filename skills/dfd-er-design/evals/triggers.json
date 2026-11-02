@@ -1,10 +1,37 @@
 {
   "skill": "dfd-er-design",
   "test_cases": [
-    {"input": "ออกแบบ DFD ให้หน่อย", "should_trigger": true},
-    {"input": "ช่วยวาด ER Diagram ตามหลักข้อมูลมีที่มาที่ไป", "should_trigger": true},
-    {"input": "ตรวจสอบเอกสารโครงงานบท 3", "should_trigger": true},
-    {"input": "ทำอาหารไทย", "should_trigger": false},
-    {"input": "เขียนโค้ด Python", "should_trigger": false}
+    {
+      "input": "ออกแบบ DFD ให้หน่อย",
+      "should_trigger": true
+    },
+    {
+      "input": "ช่วยวาด ER Diagram ตามหลักข้อมูลมีที่มาที่ไป",
+      "should_trigger": true
+    },
+    {
+      "input": "ตรวจสอบเอกสารโครงงานบท 3",
+      "should_trigger": true
+    },
+    {
+      "input": "ทำอาหารไทย",
+      "should_trigger": false
+    },
+    {
+      "input": "เขียนโค้ด Python",
+      "should_trigger": false
+    },
+    {
+      "input": "ทำ Data Dictionary และ SQL จาก ER ให้หน่อย",
+      "should_trigger": true
+    },
+    {
+      "input": "ใส่รูป ER ลงรายงานบทที่ 3 ให้ถูกรูปแบบ",
+      "should_trigger": true
+    },
+    {
+      "input": "แปลบทคัดย่อเป็นภาษาอังกฤษ",
+      "should_trigger": false
+    }
   ]
 }
