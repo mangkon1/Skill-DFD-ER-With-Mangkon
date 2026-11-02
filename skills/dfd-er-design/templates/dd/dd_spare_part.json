@@ -1,0 +1,953 @@
+{
+ "columns_header": [
+  "Attribute Name",
+  "Description",
+  "Data Type",
+  "Size",
+  "Not Null",
+  "Unique",
+  "Key",
+  "References Table"
+ ],
+ "caption_format": "ตารางที่ {no}  {table} ({title_th})",
+ "tables": [
+  {
+   "no": "3.1",
+   "table": "employees",
+   "title_th": "ข้อมูลพนักงาน",
+   "columns": [
+    {
+     "name": "emp_id",
+     "description": "รหัสพนักงาน (ภายในระบบ)",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "emp_code",
+     "description": "รหัสพนักงานตามบริษัท",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "fullname",
+     "description": "ชื่อ-สกุล",
+     "type": "varchar",
+     "size": "150",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "position",
+     "description": "ตำแหน่ง ได้แก่ ช่าง หัวหน้างาน ผู้ช่วยผู้จัดการ ผู้จัดการ",
+     "type": "varchar",
+     "size": "30",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "phone",
+     "description": "เบอร์โทรศัพท์",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "is_active",
+     "description": "สถานะการทำงาน (1 = ปฏิบัติงานอยู่)",
+     "type": "tinyint",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.2",
+   "table": "roles",
+   "title_th": "บทบาทผู้ใช้",
+   "columns": [
+    {
+     "name": "role_code",
+     "description": "รหัสบทบาท ได้แก่ ADMIN MANAGER ASSIS SUP ENG",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "role_name",
+     "description": "ชื่อบทบาท",
+     "type": "varchar",
+     "size": "50",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.3",
+   "table": "users",
+   "title_th": "บัญชีผู้ใช้",
+   "columns": [
+    {
+     "name": "user_id",
+     "description": "รหัสบัญชีผู้ใช้",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "emp_id",
+     "description": "รหัสพนักงานเจ้าของบัญชี",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "employees"
+    },
+    {
+     "name": "username",
+     "description": "ชื่อผู้ใช้สำหรับเข้าสู่ระบบ",
+     "type": "varchar",
+     "size": "50",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "password_hash",
+     "description": "รหัสผ่านที่เข้ารหัสแล้ว",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "role_code",
+     "description": "รหัสบทบาทของบัญชี",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "roles"
+    },
+    {
+     "name": "is_active",
+     "description": "เปิดใช้งานบัญชี",
+     "type": "tinyint",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "created_at",
+     "description": "วันที่สร้างบัญชี",
+     "type": "datetime",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.4",
+   "table": "zones",
+   "title_th": "โซน",
+   "columns": [
+    {
+     "name": "zone_id",
+     "description": "รหัสโซน",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "zone_name",
+     "description": "ชื่อโซน",
+     "type": "varchar",
+     "size": "100",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "team_id",
+     "description": "รหัสทีมที่โซนสังกัด",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "teams"
+    },
+    {
+     "name": "emp_id",
+     "description": "รหัสช่างประจำโซน",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "FK",
+     "references": "employees"
+    },
+    {
+     "name": "description",
+     "description": "รายละเอียดพื้นที่ของโซน",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "is_active",
+     "description": "เปิดใช้งานโซน",
+     "type": "tinyint",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.5",
+   "table": "teams",
+   "title_th": "ทีม",
+   "columns": [
+    {
+     "name": "team_id",
+     "description": "รหัสทีม",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "team_name",
+     "description": "ชื่อทีม",
+     "type": "varchar",
+     "size": "100",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "sup_emp_id",
+     "description": "รหัสหัวหน้างานของทีม",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "employees"
+    },
+    {
+     "name": "is_active",
+     "description": "เปิดใช้งานทีม",
+     "type": "tinyint",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.6",
+   "table": "team_supervisor_logs",
+   "title_th": "ประวัติการย้ายทีมของหัวหน้างาน",
+   "columns": [
+    {
+     "name": "log_id",
+     "description": "รหัสรายการย้ายทีม",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "emp_id",
+     "description": "รหัสหัวหน้างานที่ถูกย้าย",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "employees"
+    },
+    {
+     "name": "prev_team_id",
+     "description": "รหัสทีมก่อนหน้า (ว่างไว้ = กำหนดครั้งแรก)",
+     "type": "int",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "FK",
+     "references": "teams"
+    },
+    {
+     "name": "new_team_id",
+     "description": "รหัสทีมที่ย้ายไป",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "teams"
+    },
+    {
+     "name": "changed_at",
+     "description": "วันเวลาที่เปลี่ยนทีม",
+     "type": "datetime",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.7",
+   "table": "product_types",
+   "title_th": "ประเภทอุปกรณ์",
+   "columns": [
+    {
+     "name": "type_id",
+     "description": "รหัสประเภทอุปกรณ์",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "type_name",
+     "description": "ชื่อประเภท ได้แก่ Router, Switch, UPS, LAN Cable และ Access Point",
+     "type": "varchar",
+     "size": "50",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.8",
+   "table": "products",
+   "title_th": "รุ่นอุปกรณ์",
+   "columns": [
+    {
+     "name": "product_id",
+     "description": "รหัสรุ่นอุปกรณ์",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "type_id",
+     "description": "รหัสประเภทอุปกรณ์",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "product_types"
+    },
+    {
+     "name": "brand",
+     "description": "ยี่ห้อ",
+     "type": "varchar",
+     "size": "50",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "model_name",
+     "description": "ชื่อรุ่น",
+     "type": "varchar",
+     "size": "100",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.9",
+   "table": "spare_statuses",
+   "title_th": "สถานะอุปกรณ์",
+   "columns": [
+    {
+     "name": "status_code",
+     "description": "รหัสสถานะ",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "status_name",
+     "description": "ชื่อสถานะ เช่น รอแจกจ่าย พร้อมใช้ ชำรุด ส่งซ่อม",
+     "type": "varchar",
+     "size": "50",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "step_no",
+     "description": "ลำดับขั้นของสถานะ",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "description",
+     "description": "คำอธิบายสถานะ",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.10",
+   "table": "spares",
+   "title_th": "อุปกรณ์อะไหล่รายเครื่อง",
+   "columns": [
+    {
+     "name": "spare_id",
+     "description": "รหัสอุปกรณ์รายเครื่อง",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "serial_number",
+     "description": "หมายเลขเครื่อง (Serial Number)",
+     "type": "varchar",
+     "size": "50",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "product_id",
+     "description": "รหัสรุ่นอุปกรณ์",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "products"
+    },
+    {
+     "name": "status_code",
+     "description": "รหัสสถานะปัจจุบัน",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "spare_statuses"
+    },
+    {
+     "name": "emp_id",
+     "description": "รหัสช่างผู้ถือครองปัจจุบัน (ว่างไว้เมื่อยังไม่แจกจ่ายหรือส่งซ่อมแล้ว)",
+     "type": "int",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "FK",
+     "references": "employees"
+    },
+    {
+     "name": "store_doc_no",
+     "description": "เลขที่เอกสารรับจากคลังหรือส่งซ่อม",
+     "type": "varchar",
+     "size": "30",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "received_date",
+     "description": "วันที่รับอุปกรณ์จากคลัง",
+     "type": "date",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "remark",
+     "description": "หมายเหตุ",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "updated_at",
+     "description": "วันเวลาที่ปรับปรุงล่าสุด",
+     "type": "datetime",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.11",
+   "table": "spare_assignments",
+   "title_th": "การแจกจ่ายอุปกรณ์ให้ช่าง",
+   "columns": [
+    {
+     "name": "sa_id",
+     "description": "รหัสรายการแจกจ่าย",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "spare_id",
+     "description": "รหัสอุปกรณ์ที่แจกจ่าย",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "spares"
+    },
+    {
+     "name": "emp_id",
+     "description": "รหัสช่างผู้รับอุปกรณ์",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "employees"
+    },
+    {
+     "name": "assign_type",
+     "description": "ประเภทการแจกจ่าย ได้แก่ ปกติ หรือ ชดเชย",
+     "type": "varchar",
+     "size": "10",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "assigned_at",
+     "description": "วันเวลาที่แจกจ่าย",
+     "type": "datetime",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "confirmed_at",
+     "description": "วันเวลาที่ช่างยืนยันรับ",
+     "type": "datetime",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "note",
+     "description": "หมายเหตุ เช่น เลขที่อุปกรณ์ที่ได้รับชดเชย",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.12",
+   "table": "spare_usages",
+   "title_th": "การใช้งานอุปกรณ์หน้างาน",
+   "columns": [
+    {
+     "name": "usage_id",
+     "description": "รหัสรายการใช้งาน",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "spare_id",
+     "description": "รหัสอุปกรณ์ที่นำไปติดตั้ง",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "spares"
+    },
+    {
+     "name": "removed_spare_id",
+     "description": "รหัสอุปกรณ์ที่ถอดคืนจากหน้างาน",
+     "type": "int",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "FK",
+     "references": "spares"
+    },
+    {
+     "name": "emp_id",
+     "description": "รหัสช่างผู้ใช้งาน",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "employees"
+    },
+    {
+     "name": "cid",
+     "description": "รหัสวงจร (Circuit ID)",
+     "type": "varchar",
+     "size": "50",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "site_name",
+     "description": "ชื่อสถานที่ติดตั้ง",
+     "type": "varchar",
+     "size": "150",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "photo_path",
+     "description": "ที่อยู่ไฟล์รูปหน้างาน",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "remark",
+     "description": "หมายเหตุ",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "used_at",
+     "description": "วันเวลาที่ใช้งาน",
+     "type": "datetime",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.13",
+   "table": "spare_status_logs",
+   "title_th": "ประวัติสถานะอุปกรณ์",
+   "columns": [
+    {
+     "name": "log_id",
+     "description": "รหัสประวัติสถานะ",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "spare_id",
+     "description": "รหัสอุปกรณ์",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "spares"
+    },
+    {
+     "name": "usage_id",
+     "description": "รหัสรายการใช้งานที่เกี่ยวข้อง",
+     "type": "int",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "FK",
+     "references": "spare_usages"
+    },
+    {
+     "name": "prev_status",
+     "description": "รหัสสถานะก่อนเปลี่ยน",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "status_code",
+     "description": "รหัสสถานะใหม่",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "spare_statuses"
+    },
+    {
+     "name": "symptom",
+     "description": "อาการชำรุด",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "cause",
+     "description": "สาเหตุการชำรุด",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "note",
+     "description": "หมายเหตุ เช่น เลขที่เอกสารส่งซ่อม",
+     "type": "varchar",
+     "size": "255",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "actor_id",
+     "description": "รหัสบัญชีผู้ทำรายการ",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "users"
+    },
+    {
+     "name": "logged_at",
+     "description": "วันเวลาที่เปลี่ยนสถานะ",
+     "type": "datetime",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  },
+  {
+   "no": "3.14",
+   "table": "kpi_settings",
+   "title_th": "เกณฑ์ KPI",
+   "columns": [
+    {
+     "name": "kpi_id",
+     "description": "รหัสเกณฑ์ KPI",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "Yes",
+     "key": "PK",
+     "references": ""
+    },
+    {
+     "name": "team_id",
+     "description": "รหัสทีมที่ใช้เกณฑ์ (ว่างไว้ = ทุกทีม)",
+     "type": "int",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "FK",
+     "references": "teams"
+    },
+    {
+     "name": "type_id",
+     "description": "รหัสประเภทอุปกรณ์ที่ใช้เกณฑ์ (ว่างไว้ = ทุกประเภท)",
+     "type": "int",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "FK",
+     "references": "product_types"
+    },
+    {
+     "name": "status_code",
+     "description": "รหัสสถานะที่ควบคุมเวลา เช่น ชำรุด",
+     "type": "varchar",
+     "size": "20",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "spare_statuses"
+    },
+    {
+     "name": "max_days",
+     "description": "จำนวนวันสูงสุดที่อยู่ในสถานะนั้นได้",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "effective_date",
+     "description": "วันที่เริ่มมีผล",
+     "type": "date",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "end_date",
+     "description": "วันที่สิ้นสุดการใช้เกณฑ์ (ว่างไว้ = ยังมีผล)",
+     "type": "date",
+     "size": "",
+     "not_null": "No",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    },
+    {
+     "name": "set_by",
+     "description": "รหัสบัญชีผู้ช่วยผู้จัดการผู้กำหนดเกณฑ์",
+     "type": "int",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "FK",
+     "references": "users"
+    },
+    {
+     "name": "created_at",
+     "description": "วันเวลาที่บันทึกเกณฑ์",
+     "type": "datetime",
+     "size": "",
+     "not_null": "Yes",
+     "unique": "No",
+     "key": "",
+     "references": ""
+    }
+   ]
+  }
+ ]
+}
