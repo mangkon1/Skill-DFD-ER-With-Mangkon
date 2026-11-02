@@ -1,3 +1,9 @@
 *.vsdx binary
 *.docx binary
 *.png binary
+*.pdf binary
+*.zip binary
+*.md text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.sql text eol=lf
