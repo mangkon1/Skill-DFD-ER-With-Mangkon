@@ -1,0 +1,1527 @@
+{
+ "system": "ระบบบริหารจัดการอุปกรณ์อะไหล่และติดตามสถานะการส่งซ่อม",
+ "entities": {
+  "ADM": "ผู้ดูแลระบบ",
+  "ENG": "ช่าง",
+  "SUP": "หัวหน้างาน",
+  "AST": "ผู้ช่วยผู้จัดการ",
+  "MGR": "ผู้จัดการ"
+ },
+ "stores": {
+  "D1": "ข้อมูลอุปกรณ์",
+  "D2": "ข้อมูลพนักงาน",
+  "D3": "ข้อมูลโซน",
+  "D4": "ข้อมูลทีม",
+  "D5": "ข้อมูลการแจกจ่ายอุปกรณ์",
+  "D6": "ประวัติสถานะอุปกรณ์",
+  "D7": "ข้อมูลการใช้งานอุปกรณ์",
+  "D8": "ข้อมูลเกณฑ์ KPI"
+ },
+ "store_tables": {
+  "D1": [
+   "product_types",
+   "products",
+   "spare_statuses",
+   "spares"
+  ],
+  "D2": [
+   "employees",
+   "roles",
+   "users"
+  ],
+  "D3": [
+   "zones"
+  ],
+  "D4": [
+   "teams",
+   "team_supervisor_logs"
+  ],
+  "D5": [
+   "spare_assignments"
+  ],
+  "D6": [
+   "spare_status_logs"
+  ],
+  "D7": [
+   "spare_usages"
+  ],
+  "D8": [
+   "kpi_settings"
+  ]
+ },
+ "processes": {
+  "1.0": "จัดการข้อมูลอุปกรณ์",
+  "2.0": "จัดการข้อมูลพนักงาน",
+  "3.0": "จัดการข้อมูลโซน",
+  "4.0": "จัดการข้อมูลทีม",
+  "5.0": "แจกจ่ายอุปกรณ์ให้ช่าง",
+  "6.0": "บันทึกการใช้งานและปรับสถานะอุปกรณ์",
+  "7.0": "กำหนดเกณฑ์ KPI",
+  "8.0": "ติดตามสถานะและออกรายงาน"
+ },
+ "process_breaks": {
+  "2.0": "จัดการ\nข้อมูลพนักงาน",
+  "5.0": "แจกจ่าย\nอุปกรณ์ให้ช่าง",
+  "6.0": "บันทึกการใช้งาน\nและปรับ\nสถานะอุปกรณ์",
+  "8.0": "ติดตามสถานะ\nและออกรายงาน"
+ },
+ "level1_flows": [
+  [
+   "ADM",
+   "1.0",
+   "ข้อมูลอุปกรณ์"
+  ],
+  [
+   "1.0",
+   "D1",
+   "ข้อมูลอุปกรณ์"
+  ],
+  [
+   "1.0",
+   "ADM",
+   "รายการอุปกรณ์"
+  ],
+  [
+   "ADM",
+   "2.0",
+   "ข้อมูลพนักงาน"
+  ],
+  [
+   "2.0",
+   "D2",
+   "ข้อมูลพนักงาน"
+  ],
+  [
+   "2.0",
+   "ADM",
+   "รายการพนักงาน"
+  ],
+  [
+   "ADM",
+   "3.0",
+   "ข้อมูลโซน"
+  ],
+  [
+   "D2",
+   "3.0",
+   "ข้อมูลช่าง"
+  ],
+  [
+   "D4",
+   "3.0",
+   "ข้อมูลทีม"
+  ],
+  [
+   "3.0",
+   "D3",
+   "ข้อมูลโซน"
+  ],
+  [
+   "3.0",
+   "ADM",
+   "รายการโซน"
+  ],
+  [
+   "ADM",
+   "4.0",
+   "ข้อมูลทีม"
+  ],
+  [
+   "D2",
+   "4.0",
+   "ข้อมูลพนักงาน"
+  ],
+  [
+   "4.0",
+   "D4",
+   "ข้อมูลทีม"
+  ],
+  [
+   "4.0",
+   "ADM",
+   "รายการทีม"
+  ],
+  [
+   "ADM",
+   "5.0",
+   "ข้อมูลการแจกจ่าย"
+  ],
+  [
+   "D1",
+   "5.0",
+   "ข้อมูลอุปกรณ์"
+  ],
+  [
+   "D2",
+   "5.0",
+   "ข้อมูลช่าง"
+  ],
+  [
+   "5.0",
+   "D5",
+   "ข้อมูลการแจกจ่าย"
+  ],
+  [
+   "D5",
+   "5.0",
+   "ข้อมูลการแจกจ่าย"
+  ],
+  [
+   "5.0",
+   "D1",
+   "สถานะอุปกรณ์"
+  ],
+  [
+   "5.0",
+   "D6",
+   "ประวัติสถานะ"
+  ],
+  [
+   "5.0",
+   "ENG",
+   "รายการอุปกรณ์ที่ได้รับ"
+  ],
+  [
+   "ENG",
+   "5.0",
+   "การยืนยันรับอุปกรณ์"
+  ],
+  [
+   "ENG",
+   "6.0",
+   "ข้อมูลการใช้งาน/อาการชำรุด"
+  ],
+  [
+   "D1",
+   "6.0",
+   "ข้อมูลอุปกรณ์ที่ถือครอง"
+  ],
+  [
+   "6.0",
+   "D7",
+   "ข้อมูลการใช้งาน"
+  ],
+  [
+   "D7",
+   "6.0",
+   "ข้อมูลการใช้งาน"
+  ],
+  [
+   "6.0",
+   "D1",
+   "สถานะอุปกรณ์"
+  ],
+  [
+   "6.0",
+   "D6",
+   "ประวัติสถานะ/อาการชำรุด"
+  ],
+  [
+   "6.0",
+   "ENG",
+   "รายการอุปกรณ์ที่ถือครอง"
+  ],
+  [
+   "6.0",
+   "SUP",
+   "รายการอุปกรณ์ส่งคืน"
+  ],
+  [
+   "SUP",
+   "6.0",
+   "ข้อมูลรับคืน/ส่งซ่อม"
+  ],
+  [
+   "AST",
+   "7.0",
+   "ข้อมูลเกณฑ์ KPI"
+  ],
+  [
+   "D4",
+   "7.0",
+   "ข้อมูลทีม"
+  ],
+  [
+   "7.0",
+   "D8",
+   "เกณฑ์ KPI"
+  ],
+  [
+   "7.0",
+   "AST",
+   "รายการเกณฑ์ KPI"
+  ],
+  [
+   "D1",
+   "8.0",
+   "ข้อมูลอุปกรณ์"
+  ],
+  [
+   "D2",
+   "8.0",
+   "ข้อมูลพนักงาน"
+  ],
+  [
+   "D3",
+   "8.0",
+   "ข้อมูลโซน"
+  ],
+  [
+   "D4",
+   "8.0",
+   "ข้อมูลทีม"
+  ],
+  [
+   "D6",
+   "8.0",
+   "ประวัติสถานะ"
+  ],
+  [
+   "D8",
+   "8.0",
+   "เกณฑ์ KPI"
+  ],
+  [
+   "8.0",
+   "SUP",
+   "รายการเกินเกณฑ์ KPI"
+  ],
+  [
+   "8.0",
+   "AST",
+   "รายงานสถานะและ KPI"
+  ],
+  [
+   "8.0",
+   "MGR",
+   "รายงานสรุปสถานะอุปกรณ์"
+  ]
+ ],
+ "context": {
+  "name": "01_Context_Diagram",
+  "canvas": [
+   12.4,
+   10.2
+  ],
+  "label_pt": 16,
+  "process": {
+   "x": 6.2,
+   "y": 4.4,
+   "w": 2.8,
+   "h": 4.4,
+   "pt": 18,
+   "name": "ระบบบริหารจัดการ\nอุปกรณ์อะไหล่และ\nติดตามสถานะ\nการส่งซ่อม"
+  },
+  "entity_h": 0.8,
+  "entity_pt": 18,
+  "entities": [
+   {
+    "id": "ADM",
+    "x": 1.0,
+    "y": 3.2,
+    "w": 1.8
+   },
+   {
+    "id": "AST",
+    "x": 1.0,
+    "y": 5.9,
+    "w": 1.8
+   },
+   {
+    "id": "ENG",
+    "x": 11.4,
+    "y": 3.0,
+    "w": 1.8
+   },
+   {
+    "id": "SUP",
+    "x": 11.4,
+    "y": 5.7,
+    "w": 1.8
+   },
+   {
+    "id": "MGR",
+    "x": 6.2,
+    "y": 8.4,
+    "w": 1.8
+   }
+  ],
+  "horizontal": [
+   "ADM",
+   "AST",
+   "ENG",
+   "SUP"
+  ],
+  "horizontal_offset": 0.15,
+  "vertical": [
+   "MGR"
+  ]
+ },
+ "level1": {
+  "name": "02_DFD_Level1",
+  "canvas": [
+   13,
+   20
+  ],
+  "XP": 5.6,
+  "XS": 10.35,
+  "label_pt": 15,
+  "T0": 0.3,
+  "DY": 0.46,
+  "BH": 0.8,
+  "layout": {
+   "SH": 0.36,
+   "PAD": 0.03,
+   "PAD2": 0.05,
+   "SPT": 15,
+   "PPT": 16,
+   "PW": 2.0,
+   "SW": 2.7
+  },
+  "store_order": {
+   "1.0": [
+    "D1"
+   ],
+   "2.0": [
+    "D2"
+   ],
+   "3.0": [
+    "D2",
+    "D3",
+    "D4"
+   ],
+   "4.0": [
+    "D2",
+    "D4"
+   ],
+   "5.0": [
+    "D1",
+    "D2",
+    "D5",
+    "D6"
+   ],
+   "6.0": [
+    "D1",
+    "D7"
+   ],
+   "7.0": [
+    "D4",
+    "D8"
+   ],
+   "8.0": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D6"
+   ]
+  },
+  "shared_store": {
+   "6.0": [
+    "D6",
+    "5.0"
+   ],
+   "8.0": [
+    "D8",
+    "7.0"
+   ]
+  },
+  "entries": {
+   "1.0": [
+    [
+     "ADM",
+     "in",
+     "side"
+    ],
+    [
+     "ADM",
+     "out",
+     "side"
+    ]
+   ],
+   "2.0": [
+    [
+     "ADM",
+     "in",
+     "lane"
+    ],
+    [
+     "ADM",
+     "out",
+     "lane"
+    ]
+   ],
+   "3.0": [
+    [
+     "ADM",
+     "in",
+     "lane"
+    ],
+    [
+     "ADM",
+     "out",
+     "lane"
+    ]
+   ],
+   "4.0": [
+    [
+     "ADM",
+     "in",
+     "lane"
+    ],
+    [
+     "ADM",
+     "out",
+     "lane"
+    ]
+   ],
+   "5.0": [
+    [
+     "ADM",
+     "in",
+     "lane"
+    ],
+    null,
+    [
+     "ENG",
+     "in",
+     "side"
+    ],
+    [
+     "ENG",
+     "out",
+     "side"
+    ]
+   ],
+   "6.0": [
+    [
+     "ENG",
+     "in",
+     "lane"
+    ],
+    [
+     "ENG",
+     "out",
+     "lane"
+    ],
+    null,
+    [
+     "SUP",
+     "out",
+     "side"
+    ],
+    [
+     "SUP",
+     "in",
+     "side"
+    ]
+   ],
+   "7.0": [
+    [
+     "AST",
+     "in",
+     "side"
+    ],
+    [
+     "AST",
+     "out",
+     "side"
+    ]
+   ],
+   "8.0": [
+    [
+     "AST",
+     "out",
+     "lane"
+    ],
+    [
+     "SUP",
+     "out",
+     "lane"
+    ],
+    null,
+    [
+     "MGR",
+     "out",
+     "side"
+    ]
+   ]
+  },
+  "entity_left": {
+   "ADM": 0.3,
+   "ENG": 0.3,
+   "SUP": 0.3,
+   "AST": 0.75,
+   "MGR": 0.3
+  },
+  "lane_from": {
+   "SUP": "left"
+  },
+  "entity_order": [
+   "ADM",
+   "ENG",
+   "SUP",
+   "AST",
+   "MGR"
+  ],
+  "process_gap": 0.32,
+  "lane_step": 0.17
+ },
+ "level2": {
+  "XE": 1.0,
+  "XP": 6.0,
+  "XS": 11.1,
+  "label_pt": 15,
+  "canvas": [
+   13,
+   12
+  ],
+  "layout": {
+   "SH": 0.36,
+   "PAD": 0.05,
+   "PAD2": 0.07,
+   "SPT": 15,
+   "PPT": 16,
+   "PW": 2.0,
+   "SW": 2.7
+  },
+  "diagrams": [
+   {
+    "process": "6.0",
+    "name": "04_DFD_Level2_P6",
+    "subprocesses": {
+     "6.1": "บันทึกการใช้งานหน้างาน",
+     "6.2": "ปรับสถานะและบันทึกอาการชำรุด",
+     "6.3": "รับคืนและส่งซ่อมอุปกรณ์"
+    },
+    "breaks": {
+     "6.1": "บันทึก\nการใช้งานหน้างาน",
+     "6.2": "ปรับสถานะและ\nบันทึกอาการชำรุด",
+     "6.3": "รับคืนและ\nส่งซ่อมอุปกรณ์"
+    },
+    "flows": [
+     [
+      "ENG",
+      "6.1",
+      "ข้อมูลการใช้งาน/อาการชำรุด"
+     ],
+     [
+      "6.1",
+      "ENG",
+      "รายการอุปกรณ์ที่ถือครอง"
+     ],
+     [
+      "D1",
+      "6.1",
+      "ข้อมูลอุปกรณ์ที่ถือครอง"
+     ],
+     [
+      "6.1",
+      "D7",
+      "ข้อมูลการใช้งาน"
+     ],
+     [
+      "6.1",
+      "6.2",
+      "ข้อมูลอาการชำรุด"
+     ],
+     [
+      "D7",
+      "6.2",
+      "ข้อมูลการใช้งาน"
+     ],
+     [
+      "6.2",
+      "D1",
+      "สถานะอุปกรณ์"
+     ],
+     [
+      "6.2",
+      "D6",
+      "ประวัติสถานะ/อาการชำรุด"
+     ],
+     [
+      "6.2",
+      "6.3",
+      "รายการอุปกรณ์ชำรุด"
+     ],
+     [
+      "6.3",
+      "SUP",
+      "รายการอุปกรณ์ส่งคืน"
+     ],
+     [
+      "SUP",
+      "6.3",
+      "ข้อมูลรับคืน/ส่งซ่อม"
+     ],
+     [
+      "6.3",
+      "D1",
+      "สถานะอุปกรณ์"
+     ],
+     [
+      "6.3",
+      "D6",
+      "ประวัติสถานะ/อาการชำรุด"
+     ]
+    ]
+   },
+   {
+    "process": "8.0",
+    "name": "04_DFD_Level2_P8",
+    "subprocesses": {
+     "8.1": "คำนวณระยะเวลาในสถานะ",
+     "8.2": "ตรวจสอบเกณฑ์ KPI และแจ้งเตือน",
+     "8.3": "ออกรายงานตามสิทธิ์"
+    },
+    "breaks": {
+     "8.1": "คำนวณ\nระยะเวลา\nในสถานะ",
+     "8.2": "ตรวจสอบเกณฑ์\nKPI และแจ้งเตือน",
+     "8.3": "ออกรายงาน\nตามสิทธิ์"
+    },
+    "flows": [
+     [
+      "D1",
+      "8.1",
+      "ข้อมูลอุปกรณ์"
+     ],
+     [
+      "D6",
+      "8.1",
+      "ประวัติสถานะ"
+     ],
+     [
+      "8.1",
+      "8.2",
+      "จำนวนวันในสถานะ"
+     ],
+     [
+      "D2",
+      "8.2",
+      "ข้อมูลพนักงาน"
+     ],
+     [
+      "D3",
+      "8.2",
+      "ข้อมูลโซน"
+     ],
+     [
+      "D4",
+      "8.2",
+      "ข้อมูลทีม"
+     ],
+     [
+      "D8",
+      "8.2",
+      "เกณฑ์ KPI"
+     ],
+     [
+      "8.2",
+      "SUP",
+      "รายการเกินเกณฑ์ KPI"
+     ],
+     [
+      "8.2",
+      "8.3",
+      "ผลการตรวจเกณฑ์ KPI"
+     ],
+     [
+      "8.3",
+      "AST",
+      "รายงานสถานะและ KPI"
+     ],
+     [
+      "8.3",
+      "MGR",
+      "รายงานสรุปสถานะอุปกรณ์"
+     ]
+    ]
+   }
+  ]
+ },
+ "er": {
+  "name": "03_ER_Diagram",
+  "canvas": [
+   18,
+   12
+  ],
+  "row_h": 0.24,
+  "table_w": 2.05,
+  "header_pt": 13,
+  "label_pt": 12,
+  "tables": {
+   "roles": [
+    [
+     "PK",
+     "role_code"
+    ],
+    [
+     "",
+     "role_name"
+    ]
+   ],
+   "users": [
+    [
+     "PK",
+     "user_id"
+    ],
+    [
+     "FK",
+     "emp_id"
+    ],
+    [
+     "",
+     "username"
+    ],
+    [
+     "",
+     "password_hash"
+    ],
+    [
+     "FK",
+     "role_code"
+    ],
+    [
+     "",
+     "is_active"
+    ],
+    [
+     "",
+     "created_at"
+    ]
+   ],
+   "employees": [
+    [
+     "PK",
+     "emp_id"
+    ],
+    [
+     "",
+     "emp_code"
+    ],
+    [
+     "",
+     "fullname"
+    ],
+    [
+     "",
+     "position"
+    ],
+    [
+     "",
+     "phone"
+    ],
+    [
+     "",
+     "is_active"
+    ]
+   ],
+   "zones": [
+    [
+     "PK",
+     "zone_id"
+    ],
+    [
+     "",
+     "zone_name"
+    ],
+    [
+     "FK",
+     "team_id"
+    ],
+    [
+     "FK",
+     "emp_id"
+    ],
+    [
+     "",
+     "description"
+    ],
+    [
+     "",
+     "is_active"
+    ]
+   ],
+   "teams": [
+    [
+     "PK",
+     "team_id"
+    ],
+    [
+     "",
+     "team_name"
+    ],
+    [
+     "FK",
+     "sup_emp_id"
+    ],
+    [
+     "",
+     "is_active"
+    ]
+   ],
+   "team_supervisor_logs": [
+    [
+     "PK",
+     "log_id"
+    ],
+    [
+     "FK",
+     "emp_id"
+    ],
+    [
+     "FK",
+     "prev_team_id"
+    ],
+    [
+     "FK",
+     "new_team_id"
+    ],
+    [
+     "",
+     "changed_at"
+    ]
+   ],
+   "product_types": [
+    [
+     "PK",
+     "type_id"
+    ],
+    [
+     "",
+     "type_name"
+    ]
+   ],
+   "products": [
+    [
+     "PK",
+     "product_id"
+    ],
+    [
+     "FK",
+     "type_id"
+    ],
+    [
+     "",
+     "brand"
+    ],
+    [
+     "",
+     "model_name"
+    ]
+   ],
+   "spare_statuses": [
+    [
+     "PK",
+     "status_code"
+    ],
+    [
+     "",
+     "status_name"
+    ],
+    [
+     "",
+     "step_no"
+    ],
+    [
+     "",
+     "description"
+    ]
+   ],
+   "spares": [
+    [
+     "PK",
+     "spare_id"
+    ],
+    [
+     "",
+     "serial_number"
+    ],
+    [
+     "FK",
+     "product_id"
+    ],
+    [
+     "FK",
+     "status_code"
+    ],
+    [
+     "FK",
+     "emp_id"
+    ],
+    [
+     "",
+     "store_doc_no"
+    ],
+    [
+     "",
+     "received_date"
+    ],
+    [
+     "",
+     "remark"
+    ],
+    [
+     "",
+     "updated_at"
+    ]
+   ],
+   "spare_assignments": [
+    [
+     "PK",
+     "sa_id"
+    ],
+    [
+     "FK",
+     "spare_id"
+    ],
+    [
+     "FK",
+     "emp_id"
+    ],
+    [
+     "",
+     "assign_type"
+    ],
+    [
+     "",
+     "assigned_at"
+    ],
+    [
+     "",
+     "confirmed_at"
+    ],
+    [
+     "",
+     "note"
+    ]
+   ],
+   "spare_usages": [
+    [
+     "PK",
+     "usage_id"
+    ],
+    [
+     "FK",
+     "spare_id"
+    ],
+    [
+     "FK",
+     "removed_spare_id"
+    ],
+    [
+     "FK",
+     "emp_id"
+    ],
+    [
+     "",
+     "cid"
+    ],
+    [
+     "",
+     "site_name"
+    ],
+    [
+     "",
+     "photo_path"
+    ],
+    [
+     "",
+     "remark"
+    ],
+    [
+     "",
+     "used_at"
+    ]
+   ],
+   "spare_status_logs": [
+    [
+     "PK",
+     "log_id"
+    ],
+    [
+     "FK",
+     "spare_id"
+    ],
+    [
+     "FK",
+     "usage_id"
+    ],
+    [
+     "",
+     "prev_status"
+    ],
+    [
+     "FK",
+     "status_code"
+    ],
+    [
+     "",
+     "symptom"
+    ],
+    [
+     "",
+     "cause"
+    ],
+    [
+     "",
+     "note"
+    ],
+    [
+     "FK",
+     "actor_id"
+    ],
+    [
+     "",
+     "logged_at"
+    ]
+   ],
+   "kpi_settings": [
+    [
+     "PK",
+     "kpi_id"
+    ],
+    [
+     "FK",
+     "team_id"
+    ],
+    [
+     "FK",
+     "type_id"
+    ],
+    [
+     "FK",
+     "status_code"
+    ],
+    [
+     "",
+     "max_days"
+    ],
+    [
+     "",
+     "effective_date"
+    ],
+    [
+     "",
+     "end_date"
+    ],
+    [
+     "FK",
+     "set_by"
+    ],
+    [
+     "",
+     "created_at"
+    ]
+   ]
+  },
+  "placement": [
+   {
+    "name": "teams",
+    "x": 1.325,
+    "y": 1.2
+   },
+   {
+    "name": "zones",
+    "x": 4.275,
+    "y": 1.44
+   },
+   {
+    "name": "team_supervisor_logs",
+    "x": 4.275,
+    "y": 3.7700000000000005
+   },
+   {
+    "name": "roles",
+    "x": 4.275,
+    "y": 5.11
+   },
+   {
+    "name": "employees",
+    "x": 7.2250000000000005,
+    "y": 1.44
+   },
+   {
+    "name": "users",
+    "x": 7.2250000000000005,
+    "y": 4.01
+   },
+   {
+    "name": "spare_assignments",
+    "x": 10.175,
+    "y": 2.46
+   },
+   {
+    "name": "spare_usages",
+    "x": 10.175,
+    "y": 5.2
+   },
+   {
+    "name": "spares",
+    "x": 13.125,
+    "y": 1.7999999999999998
+   },
+   {
+    "name": "spare_status_logs",
+    "x": 13.125,
+    "y": 5.22
+   },
+   {
+    "name": "product_types",
+    "x": 16.075,
+    "y": 0.96
+   },
+   {
+    "name": "products",
+    "x": 16.075,
+    "y": 2.35
+   },
+   {
+    "name": "spare_statuses",
+    "x": 16.075,
+    "y": 3.95
+   },
+   {
+    "name": "kpi_settings",
+    "x": 10.175,
+    "y": 8.489999999999998
+   }
+  ],
+  "relations": [
+   {
+    "parent": "teams",
+    "child": "zones",
+    "side_parent": "R",
+    "side_child": "L",
+    "ta": 0.3,
+    "tb": 0.5,
+    "via": null,
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "employees",
+    "child": "zones",
+    "side_parent": "L",
+    "side_child": "R",
+    "ta": 0.21428571428571427,
+    "tb": 0.6428571428571429,
+    "via": null,
+    "parent_end": 25,
+    "child_end": 30
+   },
+   {
+    "parent": "roles",
+    "child": "users",
+    "side_parent": "R",
+    "side_child": "L",
+    "ta": 0.5,
+    "tb": 0.6874999999999999,
+    "via": null,
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "employees",
+    "child": "users",
+    "side_parent": "B",
+    "side_child": "T",
+    "ta": 0.5,
+    "tb": 0.5,
+    "via": null,
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "employees",
+    "child": "spare_assignments",
+    "side_parent": "R",
+    "side_child": "L",
+    "ta": 0.21428571428571427,
+    "tb": 0.4375,
+    "via": [
+     [
+      "x",
+      8.850000000000001
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "employees",
+    "child": "spare_usages",
+    "side_parent": "R",
+    "side_child": "L",
+    "ta": 0.3342857142857143,
+    "tb": 0.45000000000000007,
+    "via": [
+     [
+      "x",
+      8.55
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "employees",
+    "child": "spares",
+    "side_parent": "T",
+    "side_child": "T",
+    "ta": 0.7,
+    "tb": 0.5,
+    "via": [
+     [
+      "y",
+      0.18
+     ]
+    ],
+    "parent_end": 30,
+    "child_end": 29
+   },
+   {
+    "parent": "spares",
+    "child": "spare_assignments",
+    "side_parent": "L",
+    "side_child": "R",
+    "ta": 0.15,
+    "tb": 0.3125,
+    "via": [
+     [
+      "x",
+      11.4
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "spares",
+    "child": "spare_usages",
+    "side_parent": "L",
+    "side_child": "R",
+    "ta": 0.22999999999999998,
+    "tb": 0.25,
+    "via": [
+     [
+      "x",
+      11.58
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "spares",
+    "child": "spare_status_logs",
+    "side_parent": "B",
+    "side_child": "T",
+    "ta": 0.5,
+    "tb": 0.5,
+    "via": null,
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "spare_usages",
+    "child": "spare_status_logs",
+    "side_parent": "R",
+    "side_child": "L",
+    "ta": 0.9,
+    "tb": 0.31818181818181823,
+    "via": [
+     [
+      "x",
+      11.950000000000001
+     ]
+    ],
+    "parent_end": 30,
+    "child_end": 29
+   },
+   {
+    "parent": "products",
+    "child": "spares",
+    "side_parent": "L",
+    "side_child": "R",
+    "ta": 0.3,
+    "tb": 0.35,
+    "via": [
+     [
+      "x",
+      14.6
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "product_types",
+    "child": "products",
+    "side_parent": "B",
+    "side_child": "T",
+    "ta": 0.5,
+    "tb": 0.5,
+    "via": null,
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "spare_statuses",
+    "child": "spares",
+    "side_parent": "L",
+    "side_child": "R",
+    "ta": 0.3,
+    "tb": 0.45000000000000007,
+    "via": [
+     [
+      "x",
+      14.4
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "spare_statuses",
+    "child": "spare_status_logs",
+    "side_parent": "L",
+    "side_child": "R",
+    "ta": 0.9000000000000001,
+    "tb": 0.5,
+    "via": [
+     [
+      "x",
+      14.799999999999999
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "users",
+    "child": "spare_status_logs",
+    "side_parent": "B",
+    "side_child": "B",
+    "ta": 0.7,
+    "tb": 0.3,
+    "via": [
+     [
+      "y",
+      6.789999999999999
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "users",
+    "child": "kpi_settings",
+    "side_parent": "B",
+    "side_child": "L",
+    "ta": 0.3,
+    "tb": 0.8500000000000001,
+    "via": null,
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "spare_statuses",
+    "child": "kpi_settings",
+    "side_parent": "B",
+    "side_child": "T",
+    "ta": 0.5,
+    "tb": 0.7,
+    "via": [
+     [
+      "y",
+      7.039999999999999
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "product_types",
+    "child": "kpi_settings",
+    "side_parent": "R",
+    "side_child": "R",
+    "ta": 0.5,
+    "tb": 0.35,
+    "via": [
+     [
+      "x",
+      17.4
+     ]
+    ],
+    "parent_end": 30,
+    "child_end": 29
+   },
+   {
+    "parent": "teams",
+    "child": "kpi_settings",
+    "side_parent": "B",
+    "side_child": "B",
+    "ta": 0.3,
+    "tb": 0.3,
+    "via": [
+     [
+      "y",
+      9.989999999999998
+     ]
+    ],
+    "parent_end": 30,
+    "child_end": 29
+   },
+   {
+    "parent": "employees",
+    "child": "teams",
+    "side_parent": "T",
+    "side_child": "T",
+    "ta": 0.3,
+    "tb": 0.6,
+    "via": [
+     [
+      "y",
+      0.38
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "teams",
+    "child": "team_supervisor_logs",
+    "side_parent": "R",
+    "side_child": "L",
+    "ta": 0.9000000000000001,
+    "tb": 0.5833333333333334,
+    "via": [
+     [
+      "x",
+      2.6500000000000004
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   },
+   {
+    "parent": "employees",
+    "child": "team_supervisor_logs",
+    "side_parent": "L",
+    "side_child": "R",
+    "ta": 0.9285714285714286,
+    "tb": 0.4166666666666667,
+    "via": [
+     [
+      "x",
+      5.75
+     ]
+    ],
+    "parent_end": 25,
+    "child_end": 29
+   }
+  ]
+ }
+}
