@@ -203,7 +203,8 @@ def write(d, path):
              cell('PageWidth', num(d.W), u='IN') + cell('PageHeight', num(d.H), u='IN') + cell('ShdwOffsetX', '0.125') + cell('ShdwOffsetY', '-0.125') +
              cell('PageScale', 1, u='IN') + cell('DrawingScale', 1, u='IN') + cell('DrawingSizeType', 0) + cell('DrawingScaleType', 0) + cell('InhibitSnap', 0) +
              cell('UIVisibility', 0) + cell('ShdwType', 0) + cell('ShdwObliqueAngle', 0) + cell('ShdwScaleFactor', 1) + cell('DrawingResizeType', 1) +
-             cell('RouteStyle', 1) + cell('PageLineJumpDirX', 0) + cell('PageLineJumpDirY', 0) + cell('LineJumpCode', 0) +
+             cell('RouteStyle', 1) + cell('PageLineJumpDirX', 0) + cell('PageLineJumpDirY', 0) + cell('LineJumpCode', 2 if getattr(d, 'hops', False) else 0) +
+             (cell('LineJumpStyle', 1) if getattr(d, 'hops', False) else '') +
              cell('PrintPageOrientation', 1 if d.H >= d.W else 2) +
              "</PageSheet><Rel r:id='rId1'/></Page></Pages>")
     doc = open(os.path.join(EX, 'visio_document.xml'), encoding='utf-8').read()

@@ -6,11 +6,16 @@ def build():
     C = model.context(); S = model.SPEC['context']
     lay.setpt(S['label_pt'])
     d = Diagram(S['name'], S['canvas'][0], S['canvas'][1], lpt=S['label_pt'])
-    p = S['process']
-    d.add('0', 'proc', p['x'], p['y'], p['w'], p['h'], name=p['name'], num='0', pt=p['pt'])
+    p = S['process']; off = S.get('horizontal_offset', 0.15)
+    # every arrow must start/end ON the system box edge: grow the box so it spans all horizontal flows
+    # (and all vertical flows), instead of letting an arrow begin in empty space beside the box
+    t, b = p['y'] - p['h'] / 2, p['y'] + p['h'] / 2; l, r = p['x'] - p['w'] / 2, p['x'] + p['w'] / 2; m = 0.35
+    for e in S['entities']:
+        if e['id'] in S['horizontal']: t = min(t, e['y'] - off - m); b = max(b, e['y'] + off + m)
+        if e['id'] in S['vertical']: l = min(l, e['x'] - m); r = max(r, e['x'] + m)
+    d.add('0', 'proc', (l + r) / 2, (t + b) / 2, r - l, b - t, name=p['name'], num='0', pt=p['pt'])
     for e in S['entities']:
         d.add(e['id'], 'ent', e['x'], e['y'], e.get('w', 1.8), S['entity_h'], name=model.ENT[e['id']], pt=S['entity_pt'])
-    off = S.get('horizontal_offset', 0.15)
     for k in S['horizontal']:
         E = d.shapes[k]
         if (k, '0') in C: H(d, k, '0', E.y - off, C[(k, '0')], side='above', maxw=None)

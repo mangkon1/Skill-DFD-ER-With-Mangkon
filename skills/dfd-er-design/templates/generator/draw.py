@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tiny diagram engine: shapes + orthogonal connectors -> PIL PNG preview and Visio .vsdx"""
-from PIL import Image, ImageDraw, ImageFont
-import math, os, zipfile, io
+from PIL import Image, ImageDraw, ImageFont, features
+import math, os, sys, zipfile, io
 from xml.sax.saxutils import escape
 
 def _find_font(names):
@@ -16,17 +16,75 @@ def _find_font(names):
     raise FileNotFoundError('TH Sarabun New font not found (%s); install it or set DFDER_FONT_DIR' % names[0])
 FONT_R = _find_font(['THSarabunNew.ttf', 'THSarabunNew-Regular.ttf'])
 FONT_B = _find_font(['THSarabunNew Bold.ttf', 'THSarabunNew-Bold.ttf', 'THSarabunNewBold.ttf'])
+# Thai text: Pillow needs libraqm (+FriBiDi) to place vowels/tone marks. Windows/macOS wheels often load without
+# FriBiDi -> raqm silently off -> BASIC layout draws marks in the wrong place (they even land on the line above).
+# Then we place every mark ourselves (thai_text) so the PNG still reads correctly. Visio renders .vsdx text itself.
+HAS_RAQM = features.check('raqm') and not os.environ.get('DFDER_NO_RAQM')   # DFDER_NO_RAQM=1 tests the fallback
+ENGINE = ImageFont.Layout.RAQM if HAS_RAQM else ImageFont.Layout.BASIC
+if not HAS_RAQM and not os.environ.get('DFDER_QUIET'):
+    print('WARNING: Pillow has no libraqm; using the built-in Thai mark placement for PNG text. '
+          'Open the PNG and check tone marks (see docs/dfd-style.md, Thai text).', file=sys.stderr)
 K = 1.5295   # layout pt -> real TH Sarabun New pt (same visual size)
 VFONT = 'TH Sarabun New'
 _fc = {}
 def font(pt, bold=False, dpi=72):
     k = (pt, bold, dpi)
     if k not in _fc:
-        _fc[k] = ImageFont.truetype(FONT_B if bold else FONT_R, int(round(pt * K * dpi / 72)), layout_engine=ImageFont.Layout.RAQM)
+        _fc[k] = ImageFont.truetype(FONT_B if bold else FONT_R, int(round(pt * K * dpi / 72)), layout_engine=ENGINE)
     return _fc[k]
+
+UP_V = set('\u0e31\u0e34\u0e35\u0e36\u0e37\u0e47\u0e4d')       # upper vowels + nikhahit
+TONE = set('\u0e48\u0e49\u0e4a\u0e4b\u0e4c\u0e4e')             # tone marks, thanthakhat
+LOW = set('\u0e38\u0e39\u0e3a')                                 # sara u, uu, phinthu
+ASC = set('\u0e1b\u0e1d\u0e1f\u0e2c')                           # ascender consonants (marks move left)
+def clusters(s):
+    s = s.replace('\u0e33', '\u0e4d\u0e32')                         # sara am = nikhahit + sara aa
+    out = []
+    for ch in s:
+        if (ch in UP_V or ch in TONE or ch in LOW) and out: out[-1][1].append(ch)
+        else: out.append([ch, []])
+    return out
+_ink = {}
+def ink(f, ch):
+    """real ink box of one glyph relative to its origin (left, baseline): BASIC getbbox is not reliable for marks"""
+    k = (id(f), ch)
+    if k not in _ink:
+        n = f.size * 4; im = Image.new('L', (n, n), 0)
+        ImageDraw.Draw(im).text((n // 2, n // 2), ch, font=f, fill=255, anchor='ls')
+        b = im.getbbox() or (n // 2, n // 2, n // 2, n // 2)
+        _ink[k] = (b[0] - n // 2, b[1] - n // 2, b[2] - n // 2, b[3] - n // 2)
+    return _ink[k]
+def thai_text(g, xy, s, f, anchor='mm', fill='black'):
+    """draw one line with explicit Thai mark placement (only used when raqm is unavailable)"""
+    if not s: return
+    x, y = xy; asc, desc = f.getmetrics(); size = f.size
+    cl = clusters(s)
+    W = sum(f.getlength(b) for b, m in cl)
+    x0 = x - W / 2 if anchor[0] == 'm' else x - W if anchor[0] == 'r' else x
+    yb = y + (asc - desc) / 2 if anchor[1] == 'm' else y + asc if anchor[1] == 't' else y
+    xt = ink(f, '\u0e19')[1]; gap = 0.035 * size
+    pen = x0
+    for b, marks in cl:
+        g.text((pen, yb), b, font=f, fill=fill, anchor='ls')
+        bb = ink(f, b)
+        tr = pen + bb[2] - (0.3 * (bb[2] - bb[0]) if b in ASC else 0)
+        top = yb + xt - gap; bot = yb + gap
+        ups = [m for m in marks if m in UP_V] + [m for m in marks if m in TONE]
+        for m in ups:
+            mb = ink(f, m); oy = top - mb[3]
+            g.text((tr - mb[2], oy), m, font=f, fill=fill, anchor='ls'); top = oy + mb[1] - gap
+        for m in marks:
+            if m in LOW:
+                mb = ink(f, m); oy = bot - mb[1]
+                g.text((tr - mb[2], oy), m, font=f, fill=fill, anchor='ls'); bot = oy + mb[3] + gap
+        pen += f.getlength(b)
+def put_text(g, xy, s, f, anchor='mm', fill='black'):
+    if HAS_RAQM: g.text(xy, s, font=f, fill=fill, anchor=anchor)
+    else: thai_text(g, xy, s, f, anchor, fill)
 
 def textw(s, pt, bold=False):
     f = font(pt, bold, 720)
+    if not HAS_RAQM: return sum(f.getlength(b) for b, m in clusters(s)) / 720.0
     return f.getlength(s) / 720.0          # inches
 
 LINE = lambda pt: pt / 72.0 * 1.22
@@ -138,6 +196,10 @@ class Diagram:
                 setattr(c, 't' + end, (i + 1) / (n + 1))
         for c in d.conns:
             A, B = d.shapes[c.a], d.shapes[c.b]
+            for S_, sd, t_ in ((A, c.sa, c.ta), (B, c.sb, c.tb)):
+                if not (0.0 < t_ < 1.0):   # hard rule: both ends sit ON a shape edge (no floating arrows)
+                    raise ValueError('%s: flow %s -> %s %s end is off the %s edge of %s (fraction %.3f); move the shape or '
+                                     'the flow so both ends touch the boxes' % (d.name, c.a, c.b, c.labels[:1], sd, S_.id, t_))
             pa = A.side_pt(c.sa, c.ta); pb = B.side_pt(c.sb, c.tb)
             pts = [pa]
             cur = pa
@@ -220,7 +282,7 @@ class Diagram:
             tot = lh * len(lines)
             for i, ln in enumerate(lines):
                 y = cy * dpi - tot / 2 + lh * (i + 0.5)
-                g.text((cx * dpi, y), ln, font=f, fill='black', anchor='mm')
+                put_text(g, (cx * dpi, y), ln, f, 'mm')
         for s in d.shapes.values():
             if s.kind == 'proc':
                 g.rectangle([P(s.l, s.t), P(s.r, s.b)], outline='black', width=lw)
@@ -250,13 +312,15 @@ class Diagram:
                 f = font(s.pt - 2, False, dpi)
                 for i, (k, a) in enumerate(s.rows):
                     yy = s.t + rh * (i + 1.5)
-                    if k: g.text(P(s.l + 0.21, yy), k, font=font(s.pt - 2, True, dpi), fill='black', anchor='mm')
-                    g.text(P(s.l + 0.5, yy), a, font=f, fill='black', anchor='lm')
+                    if k: put_text(g, P(s.l + 0.21, yy), k, font(s.pt - 2, True, dpi), 'mm')
+                    put_text(g, P(s.l + 0.5, yy), a, f, 'lm')
                     if k and 'PK' in k:
-                        tw = f.getlength(a)
+                        tw = textw(a, s.pt - 2) * dpi
                         g.line([P(s.l + 0.5, yy + 0.09), (P(s.l + 0.5, 0)[0] + tw, (yy + 0.09) * dpi)], fill='black', width=1)
+        hops = getattr(d, 'hops', False)
         for c in d.conns:
             g.line([P(*p) for p in c.pts], fill='black', width=lw)
+            if hops: d._hops(g, c, dpi, lw)
             if c.ea == 13: d._arrow(g, c.pts[-2], c.pts[-1], dpi)
             if c.ba == 13: d._arrow(g, c.pts[1], c.pts[0], dpi)
             for code, p0, p1 in ((c.ba, c.pts[0], c.pts[1]), (c.ea, c.pts[-1], c.pts[-2])):
@@ -267,6 +331,19 @@ class Diagram:
         for (x, y, s, pt, b) in d.texts:
             ctext(s, x, y, pt, b)
         im.save(path)
+    def _hops(d, g, c, dpi, lw, r=0.055):
+        """line jump: a vertical segment that crosses another flow's horizontal segment hops over it (like Visio)"""
+        for p, q in zip(c.pts[:-1], c.pts[1:]):
+            if abs(p[0] - q[0]) > 1e-6: continue
+            x = p[0]; y0, y1 = sorted((p[1], q[1]))
+            for o in d.conns:
+                if o is c: continue
+                for a, b in zip(o.pts[:-1], o.pts[1:]):
+                    if abs(a[1] - b[1]) > 1e-6: continue
+                    y = a[1]; xa, xb = sorted((a[0], b[0]))
+                    if xa + r < x < xb - r and y0 + r < y < y1 - r:
+                        g.rectangle([(x - r * 0.3) * dpi, (y - r) * dpi, (x + r * 0.3) * dpi, (y + r) * dpi], fill='white')
+                        g.arc([(x - r) * dpi, (y - r) * dpi, (x + r) * dpi, (y + r) * dpi], 270, 90, fill='black', width=lw)
     def _arrow(d, g, p, q, dpi):
         ang = math.atan2(q[1] - p[1], q[0] - p[0]); L = 0.11; Wd = 0.045
         bx, by = q[0] - L * math.cos(ang), q[1] - L * math.sin(ang)
