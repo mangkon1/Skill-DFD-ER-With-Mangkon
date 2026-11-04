@@ -7,6 +7,8 @@ Prints the CRUD matrix (Level-1 process x store: W = writes/creates/updates, R =
 - entity<->store or store<->store flows (must pass through a process);
 - a process reading a store before any earlier process (or itself) writes it (creation order);
 - Level-2 diagrams that are not balanced with their Level-1 parent;
+- level1 "duplicates" naming a store/process pair that has no flow; WARN when the older per-process layout
+  would draw a store more than once;
 - (with DD) a table in store_tables missing from the DD/ER, an ER relation without an FK, or an FK without an ER line."""
 import sys, json
 def main(spec_path, dd_path=None):
@@ -55,6 +57,22 @@ def main(spec_path, dd_path=None):
         for t, T in tabs.items():
             used = any(t in ts for ts in S.get('store_tables', {}).values())
             if not used: warn.append('table %s is not mapped to any data store' % t)
+    L1 = S.get('level1', {})
+    mode = L1.get('store_mode', 'per_process' if 'store_order' in L1 else 'single')
+    if mode == 'per_process':
+        cnt = {}
+        for q, ds in L1.get('store_order', {}).items():
+            for D in ds: cnt[D] = cnt.get(D, 0) + 1
+        many = {D: n for D, n in cnt.items() if n > 1}
+        if many: warn.append('level1 store_mode per_process draws a store copy beside every process: %s. New work: use '
+                             '"store_mode": "single" (each store once, lines routed to it; max one justified duplicate)' %
+                             ', '.join('%s x%d' % kv for kv in sorted(many.items())))
+    dups = L1.get('duplicates')
+    if isinstance(dups, dict):
+        for D, ps in dups.items():
+            if D not in ST: err.append('level1 duplicates: unknown store %s' % D)
+            for q in ps:
+                if not any(D in (a, b) and q in (a, b) for a, b, l in F): err.append('level1 duplicates: %s does not use %s' % (q, D))
     for w in warn: print('WARN', w)
     for e in err: print('ERROR', e)
     print('OK' if not err else '%d error(s)' % len(err)); return not err
