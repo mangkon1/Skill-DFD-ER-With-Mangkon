@@ -4,7 +4,7 @@ description: "MUST be loaded and read FIRST, at the start of EVERY task of any k
 compatibility: Any agent that supports the Agent Skills standard. The generator needs Python 3.9+, Pillow (with raqm), lxml, python-docx and the TH Sarabun New font; Microsoft Visio is optional for hand edits.
 metadata:
   author: mangkon
-  version: "3.0"
+  version: "3.1"
 ---
 
 # กฎการทำงานของผู้ใช้ + DFD & ER Design
@@ -58,7 +58,12 @@ Skill นี้รวมกฎทั้งหมดที่ใช้ทำ DFD/
 2. **ทำตามเอกสารสไตล์ทุกตัวเลข**: `docs/dfd-style.md`, `docs/er-style.md`, `docs/report-insertion.md`
 3. **ตรรกะก่อนรูป**: ทำตาม `docs/principles.md` และผ่าน `tools/check_spec.py` ก่อนวาด
 4. **ถามแทนการเดา** เมื่อกฎธุรกิจหรือ cardinality ไม่ชัด
-5. **ไฟล์ของผู้ใช้สำคัญที่สุด**: สำรองก่อนแก้ ตรวจว่าผู้ใช้แก้ไฟล์หลังเราหรือไม่ (เวลาแก้ไข, ไฟล์ล็อก `~$`) แล้วต่อยอดจากฉบับของผู้ใช้ แก้เฉพาะส่วนที่ได้รับมอบหมาย
+5. **เส้นทุกเส้นต้องติดรูปทั้งสองปลาย**: เป็น Visio connector ที่ glue กับ connection point บนขอบกล่อง (BeginX/EndX) ห้ามมีลูกศรลอย
+   ทั้งใน Context (ติดขอบกล่อง 0 และขอบ entity) และทุก Level; `check_vsdx.py` ต้องผ่าน
+6. **Data Store และ entity วาดครั้งเดียว** แล้วลากเส้นจากทุก process เข้าหา (Level 1 ใช้ `"store_mode": "single"`)
+   ซ้ำได้เฉพาะเมื่อกล่องเดียวทำให้เกิดเส้นตัดที่เลี่ยงไม่ได้ เส้นยาวมาก หรือรก: ไม่เกิน 1 สำเนาต่อตัว และทุกกล่องที่ซ้ำมีขีดซ้ำ
+7. **ภาษาไทยต้องอ่านถูก**: ฟอนต์จาก template (TH Sarabun New หรือ Tahoma) ข้อความ UTF-8 และเปิด PNG ตรวจว่าสระ/วรรณยุกต์ไม่หาย ไม่ลอย
+8. **ไฟล์ของผู้ใช้สำคัญที่สุด**: สำรองก่อนแก้ ตรวจว่าผู้ใช้แก้ไฟล์หลังเราหรือไม่ (เวลาแก้ไข, ไฟล์ล็อก `~$`) แล้วต่อยอดจากฉบับของผู้ใช้ แก้เฉพาะส่วนที่ได้รับมอบหมาย
 
 ### Workflow
 
@@ -81,13 +86,20 @@ cd templates/generator
 python test_reproduce.py                 # ตรวจว่าเครื่องพร้อม (ต้อง PASS)
 python build.py my_system.json --out out --lo
 ```
-- ปรับตำแหน่งด้วย spec (`entries`, `store_order`, `shared_store`, `placement`, `relations.via`) ไม่ใช่แก้โค้ด
+- Level 1 งานใหม่: `"level1": {"name": "02_DFD_Level1", "store_mode": "single"}` พอ (ตัวอย่าง `examples/booking/booking.json`)
+  ไม่ต้องใช้ `store_order` (แบบเดิมที่วาด store ซ้ำข้างทุก process ใช้กับเล่มระบบอะไหล่เท่านั้น)
+- ปรับตำแหน่งด้วย spec (`entries`, `duplicates`, `placement`, `relations.via`) ไม่ใช่แก้โค้ด
+- ถ้า generator หยุดด้วย "end is off the ... edge" แปลว่ามีเส้นที่จะลอย ให้ย้าย entity/กล่องตามข้อความ อย่าแก้โค้ดให้ผ่าน
+- ถ้ามี WARNING "Pillow has no libraqm" ยังใช้ได้ (มีตัวจัดสระในตัว) แต่ต้องเปิด PNG ตรวจวรรณยุกต์
 - รายละเอียด spec: `templates/README.md`
 
 #### 4. ตรวจ
 - ผล finalize ต้องเป็น 0 ทั้ง 5 ค่าในทุกรูป
-- `python templates/tools/check_vsdx.py out/vsdx/*.vsdx` ต้องผ่าน (DisplayMode = 1, ER 1 เส้นต่อคู่)
-- เปิด PNG ดูด้วยตาทุกรูป: กล่องกลวง ตัวอักษรไม่ถูกบัง หัว ER สีฟ้า `#BDD7EE` ป้ายไม่ทับ
+- `python templates/tools/check_vsdx.py out/vsdx/*.vsdx` ต้องผ่าน (DisplayMode = 1, ER 1 เส้นต่อคู่, ไม่มีปลายเส้นลอย/ไม่ glue,
+  store/entity ไม่เกิน 2 กล่อง) และอ่าน WARN จำนวนที่ซ้ำทุกบรรทัด
+- `cross` ของ Level 1 แบบ store เดียวต้องน้อยที่สุดและเป็น line jump ค่าอื่นของ finalize ต้องเป็น 0
+- เปิด PNG ดูด้วยตาทุกรูป: กล่องกลวง ตัวอักษรไม่ถูกบัง หัว ER สีฟ้า `#BDD7EE` ป้ายไม่ทับ ลูกศรติดกล่องทุกเส้น store ไม่ซ้ำเกินจำเป็น
+  สระ/วรรณยุกต์ไทยถูกที่ (ข้อผิดพลาดที่เคยเกิด: `docs/checklist.md` ส่วน E)
 - ไล่ `docs/checklist.md` ส่วน A และ B
 
 #### 5. ใส่รูปเล่ม
@@ -108,6 +120,7 @@ python build.py my_system.json --out out --lo
 | `docs/report-insertion.md` | ใส่รูป/ตารางในเล่ม caption หัวข้อ ฟอนต์ เลขหน้า สารบัญ |
 | `docs/checklist.md` | checklist ก่อนส่ง + ข้อผิดพลาดที่พบบ่อย + บทเรียนทางเทคนิค |
 | `templates/` | vsdx/png ต้นฉบับ, generator, DD template, SQL, tools (ดู `templates/README.md`) |
+| `examples/booking/` | ตัวอย่างระบบจองสนามกีฬา แก้จากผลทดสอบ AI อื่น: Context ลูกศรติดกล่อง, Level 1 store เดียว (spec + png + vsdx) |
 | `examples/spare_part_design.md` | สรุปการออกแบบตัวอย่าง (5 entity, 8 store, 8 process, 14 ตาราง, 23 ความสัมพันธ์) |
 | `references/chapter3_example.docx` | บทที่ 3 ฉบับจริง: Process Description, ER หน้าแนวนอน, DD 14 ตาราง |
 

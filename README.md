@@ -15,7 +15,8 @@ Skill สำหรับออกแบบ วาด ตรวจ และใ�
 - **กฎทั้งหมด** ที่ใช้ทำรายงานจริงจนผ่านการตรวจของอาจารย์: ตรรกะข้อมูล ลำดับ process ขนาดกรอบ เส้น ฟอนต์ การโยงเส้น สี caption เลขหน้า
 - **ไฟล์ต้นฉบับ** Visio (.vsdx) และ PNG ของ Context, DFD Level 1, Level 2 (2 รูป) และ ER ที่แก้แล้ว (กล่องกลวงไม่บังตัวอักษร หัวตาราง ER สีฟ้า)
 - **ตัวสร้างรูป** (Python) ที่อ่าน spec JSON แล้วสร้าง .vsdx + .png ตรงกับต้นฉบับทุกไบต์ พร้อม test
-- **เครื่องมือตรวจ**: CRUD matrix, balancing, black hole/miracle, FK ↔ เส้น ER, ไฟล์ Visio
+- **เครื่องมือตรวจ**: CRUD matrix, balancing, black hole/miracle, FK ↔ เส้น ER, ไฟล์ Visio (v3.1: FAIL ถ้ามีลูกศรลอย/ไม่ glue, store/entity ซ้ำเกิน 1 สำเนา)
+- **v3.1**: Level 1 แบบ store เดียว (`"store_mode": "single"`) วาด store ละครั้งแล้วลากเส้นเข้า ซ้ำเฉพาะเมื่อจำเป็น, ภาษาไทยใน PNG ไม่เพี้ยนแม้ไม่มี libraqm, ตัวอย่าง `examples/booking`
 - **Data Dictionary** แม่แบบ .docx รูปแบบเดียวกับเล่ม และตัวสร้าง SQL DDL สำหรับ MariaDB
 
 ```

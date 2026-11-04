@@ -1,7 +1,7 @@
 {
   "name": "dfd-er-design",
   "displayName": "DFD ER Design",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "กฎการทำงานหลักที่ต้องอ่านก่อนทุกงาน (ตอบไทย สำรองก่อนแทนที่ ไม่ทับงานผู้ใช้ ตรวจผล ใช้ของที่มีอยู่ก่อน + ชุดเครื่องมือ Ponytail/Graphify/document-skills) และการออกแบบ วาด ตรวจ ใส่รูปเล่ม Context Diagram, DFD, ER Diagram, Data Dictionary, MariaDB DDL พร้อมแม่แบบ Visio และตัวสร้างรูป",
   "author": {
     "name": "Mangkon"

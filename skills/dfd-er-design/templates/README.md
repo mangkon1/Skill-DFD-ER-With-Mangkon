@@ -10,6 +10,7 @@ templates/
     build.py            จุดเริ่ม: python build.py SPEC.json --out OUT
     model.py            โหลด spec; สร้าง Context จาก Level 1 อัตโนมัติ (สมดุลเสมอ)
     d_ctx.py d_l1.py d_l2.py d_er.py   วาดแต่ละชนิด
+    d_l1s.py            Level 1 แบบ store เดียว (ค่าเริ่มต้นงานใหม่): store ละ 1 กล่อง ลากเส้นเข้า ซ้ำได้ไม่เกิน 1 สำเนาเมื่อจำเป็น
     draw.py             รูปทรง, การเดินเส้น, PNG renderer (ฟอนต์ TH Sarabun New, K = 1.5295)
     lay.py              ตัวช่วยจัดวาง H / V / R / store_rows
     finalize.py         ดันเส้นขนานไม่ให้ทับ วางป้าย และนับ overlap/cross/through_shape/label_hits/label_label
@@ -19,7 +20,7 @@ templates/
     test_reproduce.py   ทดสอบว่า spec ตัวอย่างสร้างรูปตรงกับ vsdx/ และ png/ ทุกไบต์
   dd/          dd_template.docx (รูปแบบตาราง DD ของเล่ม), dd_spare_part.json, dd_to_docx.py
   sql/         dd_to_sql.py, schema_mariadb.sql (14 ตาราง)
-  tools/       check_spec.py (CRUD matrix + กฎตรรกะ), check_vsdx.py (ตรวจไฟล์ Visio)
+  tools/       check_spec.py (CRUD matrix + กฎตรรกะ), check_vsdx.py (ตรวจไฟล์ Visio: เส้นลอย/ไม่ glue, store/entity ซ้ำ, DisplayMode, ER)
   bootstrap/   CLAUDE.md, AGENTS.md, load-dfd-er-design.mdc, cursor-user-rule.txt, install.ps1, install.sh
                (บังคับให้อ่าน skill นี้ก่อนทุกงาน ดู README หลักหัวข้อ "บังคับให้อ่าน skill นี้ก่อนทุกงาน")
 ```
@@ -57,3 +58,17 @@ python ../sql/dd_to_sql.py ../dd/dd_spare_part.json > out/schema.sql
    (ด้าน L/R ใช้ `d_er.row_frac(table, field)`), `via` = ช่องทางเดิน `[["x", 6.2]]` หรือ `[["y", 0.18]]`, ปลาย 25/30 และ 29/30
 7. รัน `check_spec.py` → `build.py` จนผลเป็น 0 ทุกตัว → ดูรูปด้วยตา → `check_vsdx.py`
 8. ถ้าต้องขยับนิดหน่อย เปิด .vsdx ใน Visio แก้ได้ (shape เป็น group ที่ DisplayMode = 1 แล้ว) แต่ให้แก้ spec ด้วยเพื่อสร้างซ้ำได้
+
+## Level 1 งานใหม่: store เดียว
+
+```json
+"level1": {"name": "02_DFD_Level1", "store_mode": "single", "label_pt": 14,
+           "layout": {"SH": 0.36, "PW": 2.15, "SW": 2.55, "SPT": 14, "PPT": 16}}
+```
+
+- ไม่ต้องใส่ `store_order` / `entries` (สร้างให้อัตโนมัติ); ใส่ `entries`, `entity_order`, `entity_left`, `lane_from` ได้ถ้าต้องจัดเอง
+- `duplicates`: `"auto"` (ค่าเริ่มต้น ซ้ำเมื่อช่วยลดเส้นตัด/ความยาว ≥ `dup_min_gain` 4), `"none"`, หรือ `{"D4": ["7.0", "8.0"]}`
+- `store_column`: บังคับลำดับ store บนลงล่าง (ไม่ใส่ = เรียงตามตำแหน่งเฉลี่ยของ process ที่ใช้)
+- build พิมพ์ "stores drawn N, duplicated [...], channel crossings K" ต้องอธิบายได้ทุกตัวที่ซ้ำ
+- ตัวอย่าง: `../examples/booking/booking.json` (8 process, 5 store: ถ้าห้ามซ้ำจะมีเส้นตัด 76 จุด; auto ซ้ำ store ละ 1 สำเนาเหลือ 5 จุดเป็น line jump)
+- spec แบบเดิมที่มี `store_order` (เล่มระบบอะไหล่) ยังสร้างรูปเดิมได้ทุกไบต์ (`test_reproduce.py`)

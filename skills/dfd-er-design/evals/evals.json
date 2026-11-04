@@ -50,6 +50,17 @@
         "สถานะเป็นข้อมูล ไม่ใช่ process",
         "ใช้ process ปรับสถานะเดียว + ตาราง lookup"
       ]
+    },
+    {
+      "name": "new_system_l1_single_store",
+      "input": "วาด Context และ DFD Level 1 ของระบบจองสนามกีฬา (ลูกค้า พนักงาน ผู้จัดการ, 5 store)",
+      "assertions": [
+        "ใช้ \"store_mode\": \"single\" ไม่ใช้ store_order",
+        "store แต่ละตัววาดครั้งเดียว ซ้ำไม่เกิน 1 สำเนาและอธิบายเหตุผล",
+        "Context: ลูกศรทุกเส้นติดขอบกล่อง 0 และ entity",
+        "check_vsdx.py ผ่าน (ไม่มีปลายเส้นลอย/ไม่ glue)",
+        "เปิด PNG ตรวจสระ/วรรณยุกต์ไทย และแจ้งถ้า Pillow ไม่มี raqm"
+      ]
     }
   ]
 }
