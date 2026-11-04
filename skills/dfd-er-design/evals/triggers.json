@@ -15,11 +15,11 @@
     },
     {
       "input": "ทำอาหารไทย",
-      "should_trigger": false
+      "should_trigger": true
     },
     {
       "input": "เขียนโค้ด Python",
-      "should_trigger": false
+      "should_trigger": true
     },
     {
       "input": "ทำ Data Dictionary และ SQL จาก ER ให้หน่อย",
@@ -31,7 +31,16 @@
     },
     {
       "input": "แปลบทคัดย่อเป็นภาษาอังกฤษ",
-      "should_trigger": false
+      "should_trigger": true
+    },
+    {
+      "input": "ช่วยสรุปอีเมลนี้",
+      "should_trigger": true
+    },
+    {
+      "input": "แก้ไฟล์ Excel ให้หน่อย",
+      "should_trigger": true
     }
-  ]
+  ],
+  "note": "v3.0: the skill holds the global working rules and must load for EVERY task, so every prompt should trigger it"
 }
