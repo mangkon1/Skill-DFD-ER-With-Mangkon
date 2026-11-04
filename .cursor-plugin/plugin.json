@@ -1,8 +1,8 @@
 {
   "name": "dfd-er-design",
   "displayName": "DFD ER Design",
-  "version": "2.0.0",
-  "description": "ออกแบบ วาด ตรวจ และใส่รูปเล่ม Context Diagram, DFD, ER Diagram, Data Dictionary และ MariaDB DDL ตามหลักข้อมูลต้องมีที่มาที่ไป สำหรับรายงานโครงงาน พร้อมแม่แบบ Visio และตัวสร้างรูป",
+  "version": "3.0.0",
+  "description": "กฎการทำงานหลักที่ต้องอ่านก่อนทุกงาน (ตอบไทย สำรองก่อนแทนที่ ไม่ทับงานผู้ใช้ ตรวจผล ใช้ของที่มีอยู่ก่อน + ชุดเครื่องมือ Ponytail/Graphify/document-skills) และการออกแบบ วาด ตรวจ ใส่รูปเล่ม Context Diagram, DFD, ER Diagram, Data Dictionary, MariaDB DDL พร้อมแม่แบบ Visio และตัวสร้างรูป",
   "author": {
     "name": "Mangkon"
   },
@@ -17,7 +17,9 @@
     "context-diagram",
     "crows-foot",
     "mariadb",
-    "thai"
+    "thai",
+    "workflow-rules",
+    "toolchain"
   ],
   "category": "documentation",
   "skills": "./skills/"

@@ -1,0 +1,12 @@
+---
+description: Always read the dfd-er-design skill first, before any other work, in every task.
+alwaysApply: true
+---
+
+ก่อนทำอย่างอื่นในทุกงานและทุก session ให้อ่านและทำตาม `SKILL.md` ของ skill **dfd-er-design** ก่อนเสมอ
+(Before doing anything else in EVERY task, read and follow the `dfd-er-design` skill's SKILL.md first.)
+
+ตำแหน่ง: `~/.cursor/skills/dfd-er-design/SKILL.md` หรือ `skills/dfd-er-design/SKILL.md` ในโปรเจกต์
+
+- ส่วนที่ 1 (กฎทั่วไป) และ Step 0 (ตรวจชุดเครื่องมือ) ใช้กับทุกงาน
+- ส่วนที่ 2 (DFD/ER) ใช้เฉพาะงานแผนภาพ ฐานข้อมูล และรายงาน

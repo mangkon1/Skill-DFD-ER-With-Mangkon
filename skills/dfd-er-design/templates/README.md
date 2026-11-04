@@ -20,6 +20,8 @@ templates/
   dd/          dd_template.docx (รูปแบบตาราง DD ของเล่ม), dd_spare_part.json, dd_to_docx.py
   sql/         dd_to_sql.py, schema_mariadb.sql (14 ตาราง)
   tools/       check_spec.py (CRUD matrix + กฎตรรกะ), check_vsdx.py (ตรวจไฟล์ Visio)
+  bootstrap/   CLAUDE.md, AGENTS.md, load-dfd-er-design.mdc, cursor-user-rule.txt, install.ps1, install.sh
+               (บังคับให้อ่าน skill นี้ก่อนทุกงาน ดู README หลักหัวข้อ "บังคับให้อ่าน skill นี้ก่อนทุกงาน")
 ```
 
 ## ติดตั้ง
