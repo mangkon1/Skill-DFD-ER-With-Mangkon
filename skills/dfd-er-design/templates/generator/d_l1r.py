@@ -136,7 +136,8 @@ def _geom(S, P, lines, o):
             Ls = [L for L in lines if L['side'] == sd and L['n'] == key[0] and L['p'] in us]
             cnt = {u: sum(1 for L in Ls if L['p'] == u) for u in us}
             med = sorted(us)[len(us) // 2]
-            home = min(us, key=lambda u: (-cnt[u], abs(u - med)))
+            if sd == 'L' and S.get('entity_home', 'median') == 'first': home = min(us, key=lambda u: (-cnt[u], u))
+            else: home = min(us, key=lambda u: (-cnt[u], abs(u - med)))
             G[(sd, key)] = dict(sd=sd, key=key, us=us, home=home, L=Ls)
             for L in Ls: L['blk'] = (sd, key)
     # vertical layout
@@ -167,7 +168,7 @@ def _geom(S, P, lines, o):
                 obst = max(obst, cur)
             ends.append(max(cur, obst))
         bot = max(ends) + 0.1
-        nm = wrap1(model.P1[q], PW - 0.2, PPT)
+        nm = lay.BR[q].split('\n') if q in lay.BR else wrap1(model.P1[q], PW - 0.2, PPT)
         bot = max(bot, top + HH + LINE(S.get('PPT', 9)) * 1.05 * len(nm) + 0.2, top + S.get('min_process_h', 0.75))
         proc[i] = (top, bot, nm)
         y = bot + gap
@@ -264,4 +265,61 @@ def _emit(S, P, lines, o, g):
             if L['tow']: d.conn(Pq.id, Bx.id, 'L', 'L', L['lab'], ta=fr(Pq, y), tb=fe, via=[('x', xr), ('y', L['ye'])], lab=lab(0, 'a'))
             else: d.conn(Bx.id, Pq.id, 'L', 'L', L['lab'], ta=fe, tb=fr(Pq, y), via=[('x', xr), ('y', y)], lab=lab(2, 'b'))
     d.solve()
+    return d
+
+# ====================================================================== default Level 1 (v3.4): compact single boxes
+def build_single():
+    """Default Level 1 for new work (store_mode "single"): compact page.
+    Left: every entity drawn ONCE (copy only if its process set interlaces another's); lines leave the entity's left
+    edge into nested rails and enter the process side. Right: one store column close to the processes; every store is
+    drawn once first (fewest copies that make it planar, d_l1s.plan_blocks); the box sits beside the process that uses it
+    most and the other processes' lines come down/up a nested rail into the store's TOP or BOTTOM edge (the box is
+    lengthened to reach its own rails). No staggered far-right store columns, 0 crossings, 0 line jumps."""
+    import d_l1s
+    S0 = model.SPEC['level1']; S = dict(S0); S.update({k: v for k, v in S0.get('layout', {}).items() if k in ('SPT', 'PPT')})
+    LPT = S.get('label_pt', 12); S['label_pt'] = LPT; lay.setpt(LPT)
+    PPT = S.setdefault('PPT', LPT + 2); SPT = S.setdefault('SPT', LPT); EPT = S.setdefault('EPT', LPT + 2)
+    f = LPT / 8.0
+    S.setdefault('max_label_w', 1.25 * f); S.setdefault('store_name_w', 1.1 * f); S.setdefault('proc_name_w', 1.0 * PPT / 9)
+    S.setdefault('SH', max(0.3, LINE(SPT) * 1.05 + 0.12)); S.setdefault('EH', max(0.4, LINE(EPT) * 1.05 + 0.2))
+    S.setdefault('HH', max(0.26, LINE(PPT) * 1.05 + 0.08)); S.setdefault('store_id_w', max(0.3, textw('D10', SPT, True) + 0.14))
+    S.setdefault('entity_home', 'first'); S.setdefault('rail_step', 0.16); S.setdefault('rail_ext', 0.08); S.setdefault('port_pad', 0.08); S.setdefault('process_gap', 0.3); S.setdefault('clear', 0.08)
+    F = model.level1(); P = list(model.P1); ix = {q: i for i, q in enumerate(P)}
+    bad = [k for k in F if model.is_proc(k[0]) and model.is_proc(k[1])]
+    assert not bad, 'process-to-process flows are not supported yet: %s' % bad
+    lines = []
+    for q in P:
+        for D in model.STORE:
+            if (q, D) in F: lines.append(dict(p=ix[q], n=D, side='R', tow=True, lab=F[(q, D)]))
+            if (D, q) in F: lines.append(dict(p=ix[q], n=D, side='R', tow=False, lab=F[(D, q)]))
+        for e in model.ENT:
+            if (e, q) in F: lines.append(dict(p=ix[q], n=e, side='L', tow=False, lab=F[(e, q)]))
+            if (q, e) in F: lines.append(dict(p=ix[q], n=e, side='L', tow=True, lab=F[(q, e)]))
+    for L in lines: L['lab'] = [x for s in L['lab'] for x in wrap1(s, S['max_label_w'], LPT)]
+    # left: single entities first
+    users = {}
+    for L in lines:
+        if L['side'] == 'L': users.setdefault(L['n'], set()).add(L['p'])
+    users = {e: sorted(u) for e, u in users.items()}
+    split = d_l1s._plan_left(users, P)
+    BL = {}
+    for e, u in users.items():
+        if e in split:
+            BL[(e, 0)] = [i for i in u if P[i] not in split[e]]; BL[(e, 1)] = [i for i in u if P[i] in split[e]]
+        else: BL[(e, 0)] = u
+    oL = order_side(len(P), BL)
+    # right: fewest store copies that are planar; pick the most compact drawing among the candidates
+    sl = [dict(p=P[L['p']], s=L['n'], w=L['tow']) for L in lines if L['side'] == 'R']
+    best = None
+    for sp, B, orders in d_l1s.plan_blocks(sl, S):
+        o = {'L': (BL, oL), 'R': (B, orders)}
+        g = _geom(S, P, lines, o)
+        sc = (g['W'] * g['H'], g['L'])
+        if best is None or sc < best[0]: best = (sc, o, g, sp)
+    _, o, g, sp = best
+    d = _emit(S, P, lines, o, g)
+    ns = sum(1 for s in d.shapes.values() if s.kind == 'store'); ne = sum(1 for s in d.shapes.values() if s.kind == 'ent')
+    print('  %s: store boxes %d (stores %d, copied %s), entity boxes %d (entities %d, copied %s), rails %d, '
+          'crossings 0 by construction' % (d.name, ns, len({L['n'] for L in lines if L['side'] == 'R'}), sorted(sp) or 'none',
+                                          ne, len(users), sorted(split) or 'none', g['nrail']))
     return d

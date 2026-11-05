@@ -8,6 +8,8 @@ FAIL (exit 1) on:
 - FLOATING LINES: an arrow or line that is not a real connector (no BeginX/EndX), a connector end that is not glued
   (no <Connect> for BeginX or EndX), a glue to a connection point that does not exist, a connection point that is not on
   the shape's edge, or a connector end that is not on the glued shape's boundary (tolerance --tol inches, default 0.02);
+- (WARN) compactness: prints size and empty-area ratio; warns when a DFD page with stores is wider than 1.7 x its height
+  or 16 in, or more than 60% empty;
 - ANY CROSSING: two connectors whose segments intersect or touch (no crossings and no line jumps allowed; route
   around instead), a connector segment that passes through a shape (also its own end shapes) or through another
   connector's label;
@@ -29,6 +31,9 @@ def txt(sh):
     t = sh.find(N + 'Text')
     return '' if t is None else ' '.join(''.join(t.itertext()).split())
 MAXC = 2
+WIDE = 1.7     # warn when a DFD with stores is wider than 1.7 x its height ...
+MAXW = 16.0    # ... or wider than 16 in
+EMPTY = 0.6    # warn when more than 60% of 0.25 in grid cells are empty
 def check(path, tol=0.02):
     z = zipfile.ZipFile(path); assert z.testzip() is None
     for n in z.namelist():
@@ -174,8 +179,24 @@ def check_page(path, pg, x, tol):
         for p, n in pairs.items():
             if n > 1: probs.append('duplicate ER line: ' + ' - '.join(sorted(p)))
     nst = sum(len(v) for v in stores.values())
-    print('%s [%s]: crossings=%d groups=%d connectors=%d stores=%d (unique %d) entities=%d (unique %d) %s' % (
-        path, pg.split('/')[-1], ncross, len(groups), nconn, nst, len(stores), sum(len(v) for v in ents.values()), len(ents),
+    # ---------- compactness: drawing size, aspect, empty area (0.25 in grid cells touched by nothing)
+    rects = list(boxes.values()) + list(lboxes.values())
+    for sg in segs.values():
+        for p, q in sg: rects.append((min(p[0], q[0]) - 0.03, min(p[1], q[1]) - 0.03, max(p[0], q[0]) + 0.03, max(p[1], q[1]) + 0.03))
+    cw = ch = 0; empty = 0.0
+    if rects:
+        x0 = min(r[0] for r in rects); y0 = min(r[1] for r in rects); x1 = max(r[2] for r in rects); y1 = max(r[3] for r in rects)
+        cw, ch = x1 - x0, y1 - y0; G = 0.25; nx, ny = max(1, int(cw / G) + 1), max(1, int(ch / G) + 1); used = set()
+        for r in rects:
+            for i in range(int((r[0] - x0) / G), int((r[2] - x0) / G) + 1):
+                for j in range(int((r[1] - y0) / G), int((r[3] - y0) / G) + 1): used.add((i, j))
+        empty = 1 - len(used) / float(nx * ny)
+        if nst and (cw > WIDE * ch or cw > MAXW):
+            warns.append('page too wide: %.1f x %.1f in (width/height %.2f, limit %.1f, max %.0f in); attach stores top/bottom, keep one store column' % (cw, ch, cw / ch, WIDE, MAXW))
+        if nst and empty > EMPTY:
+            warns.append('page mostly empty: %.0f%% of the area has no box, line or label (> %.0f%%)' % (empty * 100, EMPTY * 100))
+    print('%s [%s]: size=%.1fx%.1f empty=%.0f%% crossings=%d groups=%d connectors=%d stores=%d (unique %d) entities=%d (unique %d) %s' % (
+        path, pg.split('/')[-1], cw, ch, empty * 100, ncross, len(groups), nconn, nst, len(stores), sum(len(v) for v in ents.values()), len(ents),
         'OK' if not probs else 'FAIL'))
     for w_ in warns: print('  WARN', w_)
     for p in probs: print('  FAIL', p)

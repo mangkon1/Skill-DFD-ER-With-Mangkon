@@ -11,7 +11,10 @@ def build():
     # "per_process" = the older instructor style used by examples/spare_part.json (a store copy beside every process).
     if S.get('layout') == 'column-rails' or S.get('style') == 'column-rails':
         import d_l1r; return d_l1r.build()
-    if S.get('store_mode', 'per_process' if 'store_order' in S else 'single') == 'single':
+    mode = S.get('store_mode', 'per_process' if 'store_order' in S else 'single')
+    if mode == 'single':     # default (v3.4): compact single boxes, store top/bottom entry (d_l1r.build_single)
+        import d_l1r; return d_l1r.build_single()
+    if mode == 'columns':    # v3.3: planar stores in staggered columns, entities staggered with lanes (d_l1s)
         import d_l1s; return d_l1s.build()
     lay.setpt(S['label_pt'])
     for k, v in S['layout'].items(): setattr(lay, k, v)
