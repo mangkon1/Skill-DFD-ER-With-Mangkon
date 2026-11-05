@@ -24,6 +24,9 @@ ENGINE = ImageFont.Layout.RAQM if HAS_RAQM else ImageFont.Layout.BASIC
 if not HAS_RAQM and not os.environ.get('DFDER_QUIET'):
     print('WARNING: Pillow has no libraqm; using the built-in Thai mark placement for PNG text. '
           'Open the PNG and check tone marks (see docs/dfd-style.md, Thai text).', file=sys.stderr)
+# arrowheads: 'small' (default since 3.3) or 'legacy' (spare-part report figures); set by the spec key "arrow"
+ARROWS = {'small': {'png': (0.075, 0.03), 'visio': 0}, 'legacy': {'png': (0.11, 0.045), 'visio': 1}}
+ARROW = dict(ARROWS['small'])
 K = 1.5295   # layout pt -> real TH Sarabun New pt (same visual size)
 VFONT = 'TH Sarabun New'
 _fc = {}
@@ -286,7 +289,7 @@ class Diagram:
         for s in d.shapes.values():
             if s.kind == 'proc':
                 g.rectangle([P(s.l, s.t), P(s.r, s.b)], outline='black', width=lw)
-                hh = 0.32
+                hh = getattr(s, 'hh', 0.32)
                 g.line([P(s.l, s.t + hh), P(s.r, s.t + hh)], fill='black', width=lw)
                 ctext(s.num, s.x, s.t + hh / 2, s.pt, True)
                 ctext(s.name, s.x, s.t + hh + (s.h - hh) / 2, s.pt)
@@ -296,7 +299,7 @@ class Diagram:
                     g.line([P(s.l, s.t + 0.16), P(s.l + 0.16, s.t)], fill='black', width=lw)
                 ctext(s.name, s.x, s.y, s.pt)
             elif s.kind == 'store':
-                iw = 0.45
+                iw = getattr(s, 'iw', 0.45)
                 g.line([P(s.r, s.t), P(s.l, s.t), P(s.l, s.b), P(s.r, s.b)], fill='black', width=lw)
                 g.line([P(s.l + iw, s.t), P(s.l + iw, s.b)], fill='black', width=lw)
                 if s.dup:
@@ -317,10 +320,8 @@ class Diagram:
                     if k and 'PK' in k:
                         tw = textw(a, s.pt - 2) * dpi
                         g.line([P(s.l + 0.5, yy + 0.09), (P(s.l + 0.5, 0)[0] + tw, (yy + 0.09) * dpi)], fill='black', width=1)
-        hops = getattr(d, 'hops', False)
         for c in d.conns:
             g.line([P(*p) for p in c.pts], fill='black', width=lw)
-            if hops: d._hops(g, c, dpi, lw)
             if c.ea == 13: d._arrow(g, c.pts[-2], c.pts[-1], dpi)
             if c.ba == 13: d._arrow(g, c.pts[1], c.pts[0], dpi)
             for code, p0, p1 in ((c.ba, c.pts[0], c.pts[1]), (c.ea, c.pts[-1], c.pts[-2])):
@@ -331,21 +332,8 @@ class Diagram:
         for (x, y, s, pt, b) in d.texts:
             ctext(s, x, y, pt, b)
         im.save(path)
-    def _hops(d, g, c, dpi, lw, r=0.055):
-        """line jump: a vertical segment that crosses another flow's horizontal segment hops over it (like Visio)"""
-        for p, q in zip(c.pts[:-1], c.pts[1:]):
-            if abs(p[0] - q[0]) > 1e-6: continue
-            x = p[0]; y0, y1 = sorted((p[1], q[1]))
-            for o in d.conns:
-                if o is c: continue
-                for a, b in zip(o.pts[:-1], o.pts[1:]):
-                    if abs(a[1] - b[1]) > 1e-6: continue
-                    y = a[1]; xa, xb = sorted((a[0], b[0]))
-                    if xa + r < x < xb - r and y0 + r < y < y1 - r:
-                        g.rectangle([(x - r * 0.3) * dpi, (y - r) * dpi, (x + r * 0.3) * dpi, (y + r) * dpi], fill='white')
-                        g.arc([(x - r) * dpi, (y - r) * dpi, (x + r) * dpi, (y + r) * dpi], 270, 90, fill='black', width=lw)
     def _arrow(d, g, p, q, dpi):
-        ang = math.atan2(q[1] - p[1], q[0] - p[0]); L = 0.11; Wd = 0.045
+        ang = math.atan2(q[1] - p[1], q[0] - p[0]); L, Wd = ARROW['png']
         bx, by = q[0] - L * math.cos(ang), q[1] - L * math.sin(ang)
         nx, ny = -math.sin(ang) * Wd, math.cos(ang) * Wd
         g.polygon([(q[0] * dpi, q[1] * dpi), ((bx + nx) * dpi, (by + ny) * dpi), ((bx - nx) * dpi, (by - ny) * dpi)], fill='black')

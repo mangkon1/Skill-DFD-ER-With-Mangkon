@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import zipfile, os
 from xml.sax.saxutils import escape, quoteattr
-from draw import VFONT, LINE, K
+from draw import VFONT, LINE, K, ARROW
 EX = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
 NS = "xmlns='http://schemas.microsoft.com/office/visio/2012/main' xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships' xml:space='preserve'"
 
@@ -77,7 +77,7 @@ def shape_xml(w, s):
         return x + text(s.name) + "</Shape>"
     if s.kind == 'proc':
         # group = outline + connection points; child 1 = header band holding the process NUMBER; child 2 = process name
-        hh = 0.32
+        hh = getattr(s, 'hh', 0.32)
         x = "<Shape %s Type='Group'>" % attr + xform(px, py, s.w, s.h) + LINEF + NOFILL
         x += cell('SelectMode', 0) + cell('DisplayMode', 1) + cell('IsTextEditTarget', 0)
         x += conn_section(s, H) + rect_geom(0, s.w, s.h, nofill=1)
@@ -101,17 +101,17 @@ def shape_xml(w, s):
         x += text(s.name) + "</Shape></Shapes></Shape>"
         return x
     if s.kind == 'store':
-        iw = 0.45
+        iw = getattr(s, 'iw', 0.45); IW = '%g' % iw
         x = "<Shape %s Type='Group'>" % attr + xform(px, py, s.w, s.h) + LINEF + NOFILL + cell('VerticalAlign', 1)
         x += cell('LeftMargin', num(0.02), u='IN') + cell('RightMargin', num(0.02), u='IN')
-        x += cell('TxtPinX', num((s.w + iw) / 2), '(Width+0.45)*0.5') + cell('TxtPinY', num(s.h / 2), 'Height*0.5')
-        x += cell('TxtWidth', num(s.w - iw), 'Width-0.45') + cell('TxtHeight', num(s.h), 'Height*1')
+        x += cell('TxtPinX', num((s.w + iw) / 2), '(Width+%s)*0.5' % IW) + cell('TxtPinY', num(s.h / 2), 'Height*0.5')
+        x += cell('TxtWidth', num(s.w - iw), 'Width-%s' % IW) + cell('TxtHeight', num(s.h), 'Height*1')
         x += cell('TxtLocPinX', num((s.w - iw) / 2), 'TxtWidth*0.5') + cell('TxtLocPinY', num(s.h / 2), 'TxtHeight*0.5') + cell('TxtAngle', 0)
         x += cell('SelectMode', 0) + cell('DisplayMode', 1) + cell('IsTextEditTarget', 1)
         x += char(s.pt) + para(1, LINE(s.pt) * 1.05) + conn_section(s, H)
         x += rect_geom(0, s.w, s.h, nofill=1, noline=1)
         x += geom(1, [('MoveTo', s.w, s.h, 'Width*1', 'Height*1'), ('LineTo', 0, s.h, '0', 'Height*1'), ('LineTo', 0, 0, '0', '0'), ('LineTo', s.w, 0, 'Width*1', '0')], nofill=1)
-        x += geom(2, [('MoveTo', iw, 0, '0.45', '0'), ('LineTo', iw, s.h, '0.45', 'Height*1')], nofill=1)
+        x += geom(2, [('MoveTo', iw, 0, IW, '0'), ('LineTo', iw, s.h, IW, 'Height*1')], nofill=1)
         if s.dup:
             x += geom(3, [('MoveTo', 0.07, 0, '0.07', '0'), ('LineTo', 0.07, s.h, '0.07', 'Height*1')], nofill=1)
         x += text(s.name)
@@ -164,7 +164,7 @@ def conn_xml(w, c):
     x += cell('BeginX', num(bx), fa) + cell('BeginY', num(by), fa) + cell('EndX', num(ex), fb) + cell('EndY', num(ey), fb)
     x += cell('ObjType', 2) + cell('ShapeRouteStyle', 1) + cell('ConLineRouteExt', 1) + cell('ConFixedCode', 0) + cell('GlueType', 0)
     x += cell('BegTrigger', 2, '_XFTRIGGER(Sheet.%d!EventXFMod)' % A) + cell('EndTrigger', 2, '_XFTRIGGER(Sheet.%d!EventXFMod)' % B)
-    x += LINEF + NOFILL + cell('BeginArrow', c.ba) + cell('EndArrow', c.ea) + cell('BeginArrowSize', 1) + cell('EndArrowSize', 1)
+    x += LINEF + NOFILL + cell('BeginArrow', c.ba) + cell('EndArrow', c.ea) + cell('BeginArrowSize', ARROW['visio'] if c.ba in (0, 13) else 1) + cell('EndArrowSize', ARROW['visio'] if c.ea in (0, 13) else 1)
     x += cell('LineJumpStyle', 0) + cell('ShapePlowCode', 0)
     if c.lbox:
         cx, cy, tw, th, pt = c.lbox
@@ -203,8 +203,7 @@ def write(d, path):
              cell('PageWidth', num(d.W), u='IN') + cell('PageHeight', num(d.H), u='IN') + cell('ShdwOffsetX', '0.125') + cell('ShdwOffsetY', '-0.125') +
              cell('PageScale', 1, u='IN') + cell('DrawingScale', 1, u='IN') + cell('DrawingSizeType', 0) + cell('DrawingScaleType', 0) + cell('InhibitSnap', 0) +
              cell('UIVisibility', 0) + cell('ShdwType', 0) + cell('ShdwObliqueAngle', 0) + cell('ShdwScaleFactor', 1) + cell('DrawingResizeType', 1) +
-             cell('RouteStyle', 1) + cell('PageLineJumpDirX', 0) + cell('PageLineJumpDirY', 0) + cell('LineJumpCode', 2 if getattr(d, 'hops', False) else 0) +
-             (cell('LineJumpStyle', 1) if getattr(d, 'hops', False) else '') +
+             cell('RouteStyle', 1) + cell('PageLineJumpDirX', 0) + cell('PageLineJumpDirY', 0) + cell('LineJumpCode', 0) +
              cell('PrintPageOrientation', 1 if d.H >= d.W else 2) +
              "</PageSheet><Rel r:id='rId1'/></Page></Pages>")
     doc = open(os.path.join(EX, 'visio_document.xml'), encoding='utf-8').read()

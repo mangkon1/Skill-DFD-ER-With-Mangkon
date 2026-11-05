@@ -9,6 +9,8 @@ def build():
     S = model.SPEC['level1']
     # store_mode "single" (default for new specs): each store drawn once, lines routed to it (d_l1s.py).
     # "per_process" = the older instructor style used by examples/spare_part.json (a store copy beside every process).
+    if S.get('layout') == 'column-rails' or S.get('style') == 'column-rails':
+        import d_l1r; return d_l1r.build()
     if S.get('store_mode', 'per_process' if 'store_order' in S else 'single') == 'single':
         import d_l1s; return d_l1s.build()
     lay.setpt(S['label_pt'])

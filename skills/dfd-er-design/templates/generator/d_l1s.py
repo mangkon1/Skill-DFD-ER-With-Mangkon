@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-"""DFD Level 1, store_mode "single" (default for new work): every data store is drawn ONCE in a store column on the
-right and every process that uses it routes its own orthogonal line to it (process edge -> own vertical channel ->
-store edge). Channel order is optimised to minimise crossings; ports are ordered so lines to the same store never
-cross. A store gets ONE extra copy (marked as a duplicate, extra line in the ID box) only when that copy removes at
-least `dup_min_gain` crossing-equivalents (crossings + vertical length / 6 in) - or when the spec forces it with
-"duplicates": {"D4": ["7.0", "8.0"]} (processes served by the 2nd copy). "duplicates": "none" disables copies.
-Entities: each drawn once on the left ('side' entry = straight line, 'lane' = down from the entity box and into the
-process), same as the instructor style. All ends are glued to connection points on the shape edges."""
+"""DFD Level 1, store_mode "single" (default for new work): ZERO crossings, ZERO line jumps.
+Processes stay in one column (creation order), entities on the left, stores on the right. Every line leaves the
+process right edge horizontally, runs in its OWN vertical lane and enters the store's left edge; nothing crosses.
+
+How: the lines on the right side form blocks (one block = one store box). A drawing without crossings exists iff the
+blocks form a non-crossing partition of the process ports (top to bottom), with free port order inside each process.
+We search for the FEWEST store copies that make that possible (copy = the allowed single duplicate, drawn with the
+duplicate mark), preferring copies that serve neighbouring processes; then nest blocks: a block whose ports lie
+between two ports of another block is drawn in a column closer to the processes, so the outer block's lanes go
+around it ("around the back"). Each store has at most 2 boxes. If no layout with <= 1 copy per store exists, the
+build stops and says so (split the process or reorder) instead of drawing a crossing.
+Spec: "duplicates": "auto" (default) or {"D4": ["6.0", "7.0", "8.0"]} (processes served by the 2nd box).
+Entities: each drawn once on the left ('side' = straight line, 'lane' = down from the entity box into the process)."""
 import itertools
 from lay import *
 import lay, model
@@ -25,126 +30,216 @@ def _entries(S, F):
             for dr in dirs: L.append([e, dr, how])
         for e, dr, how in L: first.add(e)
         E[q] = L
+    # left side: each entity ONCE (single boxes first). Entity lanes nest without crossing iff the entities' process
+    # sets are pairwise non-interlacing; only then (last resort) an entity gets ONE copy, split where it helps.
+    P = list(model.P1); ix = {q: i for i, q in enumerate(P)}
+    users = {e: sorted({ix[q] for q in P for (e2, dr, how) in E[q] if e2 == e}) for e in order}
+    split = _plan_left(users, P)
+    if split:
+        for q in P:
+            for it in E[q]:
+                if it[0] in split and q in split[it[0]]: it[0] = it[0] + '@2'
+        order = []; first = set()
+        for q in P:
+            for it in E[q]:
+                if it[0] not in order: order.append(it[0])
+                it[2] = 'lane' if it[0] in first else 'side'
+            for it in E[q]: first.add(it[0])
+    # inside one process: entities arriving by lane from above first (inner = box further right, on top), then the
+    # entities whose box is beside this process (outer first) -> no lane crosses another entity's line or box
+    for q in P: E[q].sort(key=lambda it: (0, -order.index(it[0])) if it[2] == 'lane' else (1, order.index(it[0])))
     return E, order, None, {}
 
+def _plan_left(users, P):
+    B = {e: u for e, u in users.items()}
+    if _compatible(B): return {}
+    ents = list(B)
+    for k in range(1, len(ents) + 1):
+        for Es in itertools.combinations(ents, k):
+            opts = [[set(P[i] for i in B[e][c:]) for c in range(1, len(B[e]))] for e in Es]
+            for combo in itertools.product(*opts):
+                sp = dict(zip(Es, combo)); BB = {}
+                for e, u in B.items():
+                    if e in sp:
+                        BB[e] = [i for i in u if P[i] not in sp[e]]; BB[e + '@2'] = [i for i in u if P[i] in sp[e]]
+                    else: BB[e] = u
+                if _compatible(BB): return sp
+    raise ValueError('Level 1 left side cannot avoid crossings even with one copy per entity; reorder processes')
+
+# ------------------------------------------------------------------ combinatorics (no geometry)
+def _fits(A, B):
+    """block A (process indices) fits inside one gap of block B (endpoints may be shared)"""
+    b = sorted(set(B))
+    gaps = [(b[j], b[j + 1]) for j in range(len(b) - 1)] + [(None, b[0]), (b[-1], None)]
+    for lo, hi in gaps:
+        if all((lo is None or a >= lo) and (hi is None or a <= hi) for a in A): return True
+    return False
+def _compatible(blocks):
+    ks = list(blocks)
+    for i in range(len(ks)):
+        for j in range(i + 1, len(ks)):
+            A, B = blocks[ks[i]], blocks[ks[j]]
+            if not (_fits(A, B) or _fits(B, A)): return False
+    return True
+def _noncrossing(seq):
+    last = {x: i for i, x in enumerate(seq)}; st = []; seen = set()
+    for i, x in enumerate(seq):
+        if x in seen:
+            if st[-1] != x: return False
+        else: seen.add(x); st.append(x)
+        if last[x] == i: st.pop()
+    return True
+def _orders(procs, blocks, limit=20000):
+    """port order (list of block keys) inside every process so the whole right side is a non-crossing sequence"""
+    per = [[k for k in blocks if p in blocks[k]] for p in range(len(procs))]
+    opts = [list(itertools.permutations(L)) for L in per]
+    n = 0
+    for combo in itertools.product(*opts):
+        n += 1
+        if n > limit: return None
+        seq = [k for c in combo for k in c]
+        if _noncrossing(seq): return [list(c) for c in combo]
+    return None
+
+def plan_blocks(lines, S):
+    P = list(model.P1); idx = {q: i for i, q in enumerate(P)}
+    users = {D: sorted({idx[L['p']] for L in lines if L['s'] == D}) for D in model.STORE}
+    users = {D: u for D, u in users.items() if u}
+    def blocks_for(split):
+        B = {}
+        for D, u in users.items():
+            if D in split:
+                B[(D, 0)] = [i for i in u if P[i] not in split[D]]; B[(D, 1)] = [i for i in u if P[i] in split[D]]
+            else: B[(D, 0)] = list(u)
+        return {k: v for k, v in B.items() if v}
+    mode = S.get('duplicates', 'auto')
+    if isinstance(mode, dict):
+        sp = {D: set(v) for D, v in mode.items()}; B = blocks_for(sp)
+        o = _orders(P, B) if _compatible(B) else None
+        if o is None: raise ValueError('level1 duplicates %s still give crossing lines; use "auto"' % mode)
+        return [(sp, B, o)]
+    def splits(D, allsets):
+        u = users[D]
+        if not allsets:
+            for k in range(1, len(u)): yield set(P[i] for i in u[k:])
+        else:
+            for m in range(1, 2 ** (len(u) - 1)): yield set(P[u[i]] for i in range(len(u)) if (m >> i) & 1)
+    stores = [D for D in model.STORE if D in users]
+    for k in range(0, len(stores) + 1):
+        if mode == 'none' and k: break
+        for allsets in (False, True):
+            sols = []
+            for Ds in itertools.combinations(stores, k):
+                for combo in itertools.product(*[list(splits(D, allsets)) for D in Ds]):
+                    sp = dict(zip(Ds, combo)); B = blocks_for(sp)
+                    if not _compatible(B): continue
+                    o = _orders(P, B)
+                    if o is not None: sols.append((sp, B, o))
+                    if len(sols) >= S.get('max_candidates', 40): break
+            if sols: return sols
+    raise ValueError('Level 1 cannot be drawn without crossings even with one copy per store; split a process or '
+                     'reorder processes (docs/dfd-style.md)')
+
+# ------------------------------------------------------------------ geometry
 def build():
     S = model.SPEC['level1']
     lay.setpt(S.get('label_pt', 14))
     for k, v in S.get('layout', {}).items(): setattr(lay, k, v)
     F = model.level1(); g = lambda a, b: F.get((a, b), [])
-    ENTRY, EORD, ELEFT, LFROM = _entries(S, F)
-    T0, DY, BH = S.get('T0', 0.32), S.get('DY', 0.48), S.get('BH', 0.8)
-    d = Diagram(S['name'], 20, 30, lpt=S.get('label_pt', 14))
-    LPT = S.get('label_pt', 14)
-    # ---------- lines process <-> store (one line per direction per pair)
     lines = []
     for q in model.P1:
         for D in model.STORE:
             if (q, D) in F: lines.append(dict(p=q, s=D, w=True, lab=g(q, D)))
             if (D, q) in F: lines.append(dict(p=q, s=D, w=False, lab=g(D, q)))
-    RP = lambda L: lab_h(len(L['lab'])) + S.get('port_pad', 0.08)
-    # ---------- processes in one column
-    if ELEFT is None:
-        ELEFT = {e: 0.15 + i * S.get('entity_step', 2.4) for i, e in enumerate(EORD)}
-    ew = {e: max(1.6, textw(model.ENT[e], 16) + 0.4) for e in EORD}
+    best = None
+    for sp, B, orders in plan_blocks(lines, S):
+        d = _draw(S, F, g, lines, sp, B, orders)
+        r = _score(d)
+        if best is None or r < best[0]: best = (r, d, sp)
+    r, d, sp = best
+    d.dup_report = {D: 2 for D in sp}
+    print('  %s: store boxes %d (stores %d), duplicated %s, crossings 0 by construction' % (
+        d.name, sum(1 for s in d.shapes.values() if s.kind == 'store'), len(model.STORE), sorted(sp) or 'none'))
+    return d
+
+def _score(d):
+    import finalize
+    rep = finalize.report(d)
+    L = sum(abs(p[0] - q[0]) + abs(p[1] - q[1]) for c in d.conns for p, q in zip(c.pts[:-1], c.pts[1:]))
+    xs = [s.r for s in d.shapes.values()]
+    return (sum(rep.values()), max(xs) * 2 + L)
+
+def _draw(S, F, g, lines, sp, B, orders):
+    ENTRY, EORD, ELEFT, LFROM = _entries(S, F)
+    T0, DY, BH = S.get('T0', 0.32), S.get('DY', 0.48), S.get('BH', 0.8)
+    LPT = S.get('label_pt', 14)
+    d = Diagram(S['name'], 20, 30, lpt=LPT)
+    for L in lines:
+        L['key'] = (L['s'], 1 if L['s'] in sp and L['p'] in sp[L['s']] else 0)
+    RP = lambda L: lab_h(len(L['lab'])) + S.get('port_pad', 0.12)
+    if ELEFT is None: ELEFT = {e: 0.15 + i * S.get('entity_step', 2.4) for i, e in enumerate(EORD)}
+    base = lambda e: e.split('@')[0]
+    ew = {e: max(1.6, textw(model.ENT[base(e)], 16) + 0.4) for e in EORD}
+    ecopies = {base(e) for e in EORD if '@' in e}
     xp = S.get('XP') or (max(ELEFT[e] + ew[e] for e in EORD) + S.get('entity_gap', 2.4) + lay.PW / 2)
     P = {}; y = 0.3; HH = 0.32
-    for q in model.P1:
+    for i, q in enumerate(model.P1):
         need_l = T0 * 2 + (len(ENTRY.get(q, [])) - 1) * DY + (0.12 if any(e[2] == 'side' for e in ENTRY.get(q, [])) else 0)
         need_r = HH + 0.12 + sum(RP(L) for L in lines if L['p'] == q) + 0.1
         h = max(S.get('min_process_h', 1.0), need_l, need_r)
         P[q] = d.add(q, 'proc', xp, y + h / 2, lay.PW, h, name=proc_name(q), num=model.disp(q), pt=lay.PPT)
+        # ports in the planned block order (write line above read line of the same store)
+        yy = P[q].t + HH + 0.12
+        for key in orders[i]:
+            for L in sorted([L for L in lines if L['p'] == q and L['key'] == key], key=lambda L: not L['w']):
+                yy += RP(L); L['yp'] = yy - 0.04
         y += h + S.get('process_gap', 0.36)
     labw = max([textw(s, LPT) for L in lines for s in L['lab']] + [1.0]) + 0.25
-    step = S.get('channel_step', 0.13)
-    cx0 = xp + lay.PW / 2 + labw
-
-    def layout(groups):
-        """groups: {(D, copy): [line,...]} -> place stores, order ports, optimise channels; returns plan + score"""
-        SP = S.get('store_port_step', 0.16)
-        st = []
-        for key, Ls in groups.items():
-            yc = sum(P[L['p']].y for L in Ls) / len(Ls)
-            st.append([yc, key, Ls, max(lay.SH, SP * (len(Ls) + 1))])
-        FO = S.get('store_column')            # optional fixed top-to-bottom order, e.g. ["D1", "D2", ...]
-        st.sort(key=lambda r: (FO.index(r[1][0]) * 10 + r[1][1], 0) if FO and r[1][0] in FO else (r[0], r[1]))
-        ypos = {}; bot = -1e9
-        for yc, key, Ls, h in st:
-            yy = max(yc, bot + S.get('store_gap', 0.35) + h / 2); ypos[key] = (yy, h); bot = yy + h / 2
-        # process right-side ports: ordered by target store y
-        for q in model.P1:
-            Lq = [L for Ls in groups.values() for L in Ls if L['p'] == q]
-            Lq.sort(key=lambda L: (ypos[L['key']][0], not L['w']))
-            yy = P[q].t + HH + 0.12
-            for L in Lq:
-                yy += RP(L); L['yp'] = yy - 0.04
-        # store left-side ports: ordered by process port y (lines to one store never cross)
-        for key, Ls in groups.items():
-            yc, h = ypos[key]; Ls.sort(key=lambda L: L['yp'])
-            for i, L in enumerate(Ls): L['ys'] = yc - h / 2 + h * (i + 1) / (len(Ls) + 1)
-        allL = [L for Ls in groups.values() for L in Ls]
-        n = len(allL)
-        # pair cost: crossings when A's channel is left of B's (linear ordering problem, local search)
-        def c2(A, B):
-            alo, ahi = sorted((A['yp'], A['ys'])); blo, bhi = sorted((B['yp'], B['ys']))
-            return (alo + 1e-6 < B['yp'] < ahi - 1e-6) + (blo + 1e-6 < A['ys'] < bhi - 1e-6)
-        C = [[c2(A, B) if A is not B else 0 for B in allL] for A in allL]
-        idx = list(range(n))
-        idx.sort(key=lambda i: -(allL[i]['ys'] - allL[i]['yp']))
-        def total(o): return sum(C[o[i]][o[j]] for i in range(n) for j in range(i + 1, n))
-        best = total(idx); improved = True
-        while improved and best:
-            improved = False
-            for i in range(n):
-                a = idx.pop(i); bi, bc = i, None
-                for j in range(n):
-                    idx.insert(j, a); c = total(idx) if n < 60 else 0; idx.pop(j)
-                    if bc is None or c < bc: bi, bc = j, c
-                idx.insert(bi, a)
-                if bc < best: best = bc; improved = True
-        order = [allL[i] for i in idx]
-        vlen = sum(abs(L['yp'] - L['ys']) for L in allL)
-        return dict(order=order, ypos=ypos, cross=best, vlen=vlen, score=best + vlen / S.get('dup_len_weight', 12.0))
-
-    def group(split):
-        G = {}
-        for L in lines:
-            c = 1 if L['s'] in split and L['p'] in split[L['s']] else 0
-            L['key'] = (L['s'], c); G.setdefault(L['key'], []).append(L)
-        return G
-    mode = S.get('duplicates', 'auto'); split = {}
-    if isinstance(mode, dict): split = {D: set(v) for D, v in mode.items()}
-    plan = layout(group(split))
-    if mode == 'auto':
-        gain = S.get('dup_min_gain', 4.0)
-        while True:
-            cand = None
-            for D in model.STORE:
-                if D in split: continue
-                ps = [q for q in model.P1 if any(L['s'] == D and L['p'] == q for L in lines)]
-                for k in range(1, len(ps)):
-                    sp = dict(split); sp[D] = set(ps[k:])
-                    r = layout(group(sp))
-                    if plan['score'] - r['score'] >= gain and (cand is None or r['score'] < cand[0]['score']): cand = (r, sp)
-            if not cand: break
-            print('    dup %s: score %.1f -> %.1f (cross %d -> %d)' % ([k for k in cand[1] if k not in split], plan['score'], cand[0]['score'], plan['cross'], cand[0]['cross'])); plan, split = cand
-        plan = layout(group(split))
-    d.dup_report = {D: 2 for D in split}; d.hops = plan['cross'] > 0
-    # ---------- draw stores once (or twice when justified) in the store column
-    sx = cx0 + len(plan['order']) * step + 0.3 + lay.SW / 2
-    for key, (yy, h) in plan['ypos'].items():
-        D, c = key
-        d.add('%s@%d' % (D, c), 'store', sx, yy, lay.SW, h, name=model.STORE[D], num=D, pt=lay.SPT, dup=(D in split))
-    for i, L in enumerate(plan['order']):
-        xc = cx0 + (i + 0.5) * step; Pq = P[L['p']]; St = d.shapes['%s@%d' % L['key']]
-        straight = abs(L['yp'] - L['ys']) < 1e-6
-        via = None if straight else [('x', xc)]
-        if L['w']:
-            d.conn(L['p'], St.id, 'R', 'L', L['lab'], ta=fr(Pq, L['yp']), tb=fr(St, L['ys']), via=via,
-                   lab={'seg': 0, 'end': 'a', 'gap': 0.06, 'side': 'above'})
-        else:
-            d.conn(St.id, L['p'], 'L', 'R', L['lab'], ta=fr(St, L['ys']), tb=fr(Pq, L['yp']), via=via,
-                   lab={'seg': 0 if straight else 2, 'end': 'b', 'gap': 0.06, 'side': 'above'})
+    step = S.get('lane_step_r', 0.14); SP = S.get('store_port_step', 0.16)
+    blk = {}
+    for key in B:
+        Ls = sorted([L for L in lines if L['key'] == key], key=lambda L: L['yp'])
+        blk[key] = dict(L=Ls, lo=Ls[0]['yp'], hi=Ls[-1]['yp'])
+    # nesting level: 0 = nothing nested inside; outer blocks get columns further right (they go around the inner ones)
+    def inside(a, b): return blk[b]['lo'] < blk[a]['lo'] - 1e-9 and blk[a]['hi'] < blk[b]['hi'] - 1e-9
+    lev = {}
+    for key in sorted(blk, key=lambda k: blk[k]['hi'] - blk[k]['lo']):
+        inner = [k for k in blk if k != key and inside(k, key)]
+        lev[key] = 1 + max(lev[k] for k in inner) if inner else 0
+    # store box + lanes per block
+    for key, b in blk.items():
+        m = len(b['L']); h = max(lay.SH, SP * (m + 1))
+        ys = [L['yp'] for L in b['L']]
+        if m % 2: cy = ys[m // 2]
+        else: cy = (ys[m // 2 - 1] + ys[m // 2]) / 2
+        b['h'] = h; b['cy'] = cy
+        for k, L in enumerate(b['L']): L['ys'] = cy - h / 2 + h * (k + 1) / (m + 1)
+        if m % 2: b['L'][m // 2]['ys'] = cy
+        ab = [L for L in b['L'] if L['yp'] < L['ys'] - 1e-6]
+        be = [L for L in b['L'] if L['yp'] > L['ys'] + 1e-6]
+        b['ab'] = ab; b['be'] = sorted(be, key=lambda L: -L['yp'])
+        b['nl'] = max(len(ab), len(be))
+    nlev = max(lev.values()) + 1
+    x0 = xp + lay.PW / 2 + labw; colx = []
+    for Lv in range(nlev):
+        nl = max([blk[k]['nl'] for k in blk if lev[k] == Lv] + [0])
+        sxl = x0 + nl * step + 0.3; colx.append(sxl); x0 = sxl + lay.SW + 0.35
+    for key, b in blk.items():
+        D, c = key; sxl = colx[lev[key]]
+        St = d.add('%s@%d' % key, 'store', sxl + lay.SW / 2, b['cy'], lay.SW, b['h'], name=model.STORE[D], num=D,
+                   pt=lay.SPT, dup=(D in sp))
+        for grp in (b['ab'], b['be']):
+            for i, L in enumerate(grp):
+                L['xl'] = sxl - 0.3 - i * step
+        for L in b['L']:
+            Pq = P[L['p']]; straight = abs(L['yp'] - L['ys']) < 1e-6
+            via = None if straight else [('x', L['xl'])]
+            if L['w']:
+                d.conn(L['p'], St.id, 'R', 'L', L['lab'], ta=fr(Pq, L['yp']), tb=fr(St, L['ys']), via=via,
+                       lab={'seg': 0, 'end': 'a', 'gap': 0.06, 'side': 'above'})
+            else:
+                d.conn(St.id, L['p'], 'L', 'R', L['lab'], ta=fr(St, L['ys']), tb=fr(Pq, L['yp']), via=via,
+                       lab={'seg': 0 if straight else 2, 'end': 'b', 'gap': 0.06, 'side': 'above'})
     # ---------- entities (each drawn once) on the left
     ey = {}
     for q in model.P1:
@@ -153,27 +248,26 @@ def build():
     boxes = {}
     for ent in EORD:
         ys = [v for (q, e, dr, how), v in ey.items() if e == ent and how == 'side']
-        yc = sum(ys) / len(ys)
-        boxes[ent] = d.add(ent, 'ent', ELEFT[ent] + ew[ent] / 2, yc, ew[ent], BH, name=model.ENT[ent], pt=16)
+        boxes[ent] = d.add(ent, 'ent', ELEFT[ent] + ew[ent] / 2, sum(ys) / len(ys), ew[ent], BH, name=model.ENT[base(ent)], pt=16,
+                            dup=base(ent) in ecopies)
     lab_end = lambda dr: {'end': 'b' if dr == 'in' else 'a', 'gap': 0.08, 'side': 'above'}
     lstep = S.get('lane_step', 0.18)
-    for ent, B in boxes.items():
+    for ent, Bx in boxes.items():
         lanes = sorted([(v, q, dr) for (q, e, dr, how), v in ey.items() if e == ent and how == 'lane'])
         n = len(lanes)
         for i, (v, q, dr) in enumerate(lanes):
-            if LFROM.get(ent, 'left') == 'left': x = B.l + 0.15 + (n - 1 - i) * lstep
-            else: x = B.r - 0.2 - i * lstep
-            f = (x - B.l) / B.w
-            if dr == 'in': d.conn(ent, q, 'B', 'L', g(ent, q), ta=f, tb=fr(P[q], v), lab=lab_end(dr))
-            else: d.conn(q, ent, 'L', 'B', g(q, ent), ta=fr(P[q], v), tb=f, lab=lab_end(dr))
+            if LFROM.get(ent, 'left') == 'left': x = Bx.l + 0.15 + (n - 1 - i) * lstep
+            else: x = Bx.r - 0.2 - i * lstep
+            f = (x - Bx.l) / Bx.w
+            if dr == 'in': d.conn(ent, q, 'B', 'L', g(base(ent), q), ta=f, tb=fr(P[q], v), lab=lab_end(dr))
+            else: d.conn(q, ent, 'L', 'B', g(q, base(ent)), ta=fr(P[q], v), tb=f, lab=lab_end(dr))
     for (q, e, dr, how), v in ey.items():
         if how != 'side': continue
-        B = boxes[e]
-        if dr == 'in': d.conn(e, q, 'R', 'L', g(e, q), ta=fr(B, v), tb=fr(P[q], v), lab=lab_end(dr))
-        else: d.conn(q, e, 'L', 'R', g(q, e), ta=fr(P[q], v), tb=fr(B, v), lab=lab_end(dr))
+        Bx = boxes[e]
+        if dr == 'in': d.conn(e, q, 'R', 'L', g(base(e), q), ta=fr(Bx, v), tb=fr(P[q], v), lab=lab_end(dr))
+        else: d.conn(q, e, 'L', 'R', g(q, base(e)), ta=fr(P[q], v), tb=fr(Bx, v), lab=lab_end(dr))
     drawn = {(c.a.split('@')[0], c.b.split('@')[0]) for c in d.conns}
     missing = [k for k in F if k not in drawn]
     assert not missing, 'flows in spec but not drawn (check entries): %s' % missing
     d.solve()
-    print('  %s: stores drawn %s, duplicated %s, channel crossings %d' % (d.name, len(plan['ypos']), sorted(split) or 'none', plan['cross']))
     return d

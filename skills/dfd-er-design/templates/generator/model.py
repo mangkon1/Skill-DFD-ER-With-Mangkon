@@ -11,6 +11,8 @@ def load(path):
     SYSTEM = SPEC.get('system', ''); ENT = SPEC['entities']; STORE = SPEC['stores']
     STORE_TABLES = SPEC.get('store_tables', {}); P1 = SPEC['processes']; P2 = {}
     F1 = [tuple(f) for f in SPEC['level1_flows']]
+    import draw
+    draw.ARROW.clear(); draw.ARROW.update(draw.ARROWS[SPEC.get('arrow', 'small')])
     lay.BR.clear(); lay.BR.update(SPEC.get('process_breaks', {}))
     return SPEC
 def _merge(pairs):

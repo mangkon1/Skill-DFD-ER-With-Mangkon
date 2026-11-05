@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """Usage: python build.py SPEC.json [--out OUT_DIR] [--only ctx,l1,l2,er] [--lo]
 Writes OUT_DIR/png/*.png (220 dpi) and OUT_DIR/vsdx/*.vsdx, then prints the finalize report
-(overlap / cross / through_shape / label_hits / label_label: all must be 0; in Level 1 store_mode "single"
-unavoidable crossings are allowed, minimised and drawn with line jumps)."""
+(overlap / cross / through_shape / label_hits / label_label: all must be 0, no exceptions: no crossings, no line jumps)."""
 import sys, os, subprocess, argparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import model
@@ -36,8 +35,8 @@ def main(argv=None):
         ds = importlib.import_module(MODS[k]).build()
         for d in (ds if isinstance(ds, list) else [ds]):
             r = finalize.finalize(d); print(d.name, r)
-            # crossings are tolerated only in store_mode "single" (minimised, drawn with line jumps); all else must be 0
-            if isinstance(r, dict) and any(v for k_, v in r.items() if not (k_ == 'cross' and getattr(d, 'hops', False))): bad += 1
+            # every value must be 0 (no crossings, no line jumps, nothing through boxes or labels)
+            if isinstance(r, dict) and any(r.values()): bad += 1
             fit(d); print('  size %.2f x %.2f in' % (d.W, d.H))
             d.png(os.path.join(a.out, 'png', d.name + '.png'), dpi=220)
             vsdx.write(d, os.path.join(a.out, 'vsdx', d.name + '.vsdx'))
