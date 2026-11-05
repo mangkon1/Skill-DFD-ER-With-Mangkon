@@ -18,6 +18,7 @@ Skill สำหรับออกแบบ วาด ตรวจ และใ�
 - **เครื่องมือตรวจ**: CRUD matrix, balancing, black hole/miracle, FK ↔ เส้น ER, ไฟล์ Visio (v3.1: FAIL ถ้ามีลูกศรลอย/ไม่ glue, store/entity ซ้ำเกิน 1 สำเนา)
 - **v3.1**: Level 1 แบบ store เดียว (`"store_mode": "single"`) วาด store ละครั้งแล้วลากเส้นเข้า ซ้ำเฉพาะเมื่อจำเป็น, ภาษาไทยใน PNG ไม่เพี้ยนแม้ไม่มี libraqm, ตัวอย่าง `examples/booking`
 - **v3.3**: ไม่มีเส้นตัด/เส้นค่อม (line jump) ทุกรูป, entity ฝั่งซ้ายกล่องเดี่ยวเยื้องกันเป็นรูป L ซ้อน, store ซ้ำน้อยที่สุดเท่าที่ต้อง, หัวลูกศรเล็ก, check_vsdx FAIL ทุกจุดตัด
+- **v3.4**: Level 1 กะทัดรัด: store คอลัมน์เดียวชิด process เส้นเข้าขอบบน/ล่างของ store หน้าไม่ยืดออกข้าง (จองสนาม 23.2 → 11.3 in), ตัวอย่างใหม่ `examples/library` + `test_examples.py`, check_vsdx รายงานขนาด/พื้นที่ว่าง และเตือนหน้ากว้างเกิน
 - **Data Dictionary** แม่แบบ .docx รูปแบบเดียวกับเล่ม และตัวสร้าง SQL DDL สำหรับ MariaDB
 
 ```

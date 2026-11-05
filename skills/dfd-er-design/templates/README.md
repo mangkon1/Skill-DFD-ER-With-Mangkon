@@ -10,7 +10,9 @@ templates/
     build.py            จุดเริ่ม: python build.py SPEC.json --out OUT
     model.py            โหลด spec; สร้าง Context จาก Level 1 อัตโนมัติ (สมดุลเสมอ)
     d_ctx.py d_l1.py d_l2.py d_er.py   วาดแต่ละชนิด
-    d_l1s.py            Level 1 แบบ store เดียว (ค่าเริ่มต้นงานใหม่): store ละ 1 กล่อง ลากเส้นเข้า ซ้ำได้ไม่เกิน 1 สำเนาเมื่อจำเป็น
+    d_l1r.py            Level 1 ค่าเริ่มต้น (build_single, v3.4): store คอลัมน์เดียวชิด process เส้นเข้าขอบบน/ล่าง store; และ column-rails
+    d_l1s.py            วางแผนสำเนาน้อยที่สุด (plan_blocks / _plan_left) และแบบหลายคอลัมน์ store_mode "columns" (v3.3)
+    test_examples.py    ทดสอบ booking + library: finalize 0, check_vsdx OK, entity ครั้งเดียว, กว้าง <= 1.7 x สูง
     draw.py             รูปทรง, การเดินเส้น, PNG renderer (ฟอนต์ TH Sarabun New, K = 1.5295)
     lay.py              ตัวช่วยจัดวาง H / V / R / store_rows
     finalize.py         ดันเส้นขนานไม่ให้ทับ วางป้าย และนับ overlap/cross/through_shape/label_hits/label_label
@@ -68,7 +70,7 @@ python ../sql/dd_to_sql.py ../dd/dd_spare_part.json > out/schema.sql
 - build พิมพ์จำนวนกล่อง store/entity, ตัวที่ซ้ำ, จำนวนราง; ตรวจด้วย `check_vsdx.py --max-copies 0`
 - ตัวอย่าง `../examples/booking/booking_rails.json` (5.85 x 12.31 in)
 
-## Level 1 งานใหม่: store เดียว
+## Level 1 งานใหม่: store เดียว แบบกะทัดรัด (ค่าเริ่มต้น v3.4)
 
 ```json
 "level1": {"name": "02_DFD_Level1", "store_mode": "single", "label_pt": 14,
@@ -77,6 +79,7 @@ python ../sql/dd_to_sql.py ../dd/dd_spare_part.json > out/schema.sql
 
 - ไม่ต้องใส่ `store_order` / `entries` (สร้างให้อัตโนมัติ); ใส่ `entries`, `entity_order`, `entity_left`, `lane_from` ได้ถ้าต้องจัดเอง
 - `duplicates`: `"auto"` (ค่าเริ่มต้น: จำนวนสำเนาน้อยที่สุดที่ไม่มีเส้นตัด ไม่เกิน 1 สำเนาต่อ store), `"none"` (error ถ้าต้องตัด), หรือ `{"D4": ["7.0", "8.0"]}`
+- store คอลัมน์เดียวชิด process; เส้นจาก process อื่นเข้าขอบบน/ล่างของ store ผ่านรางขวา (`rail_step` 0.16, `rail_ext` 0.08); แบบ v3.3 หลายคอลัมน์: `"store_mode": "columns"`
 - build พิมพ์ "store boxes N (stores M), duplicated [...], crossings 0 by construction"; ห้ามเส้นตัดและห้าม line jump (build error ถ้า cross > 0)
 - ตัวอย่าง: `../examples/booking/booking.json` (8 process, 5 store: 8 กล่อง ซ้ำ D2 D3 D5 ตัวละ 1 สำเนา ซึ่งพิสูจน์แล้วว่าน้อยที่สุด เส้นตัด 0)
 - spec แบบเดิมที่มี `store_order` (เล่มระบบอะไหล่) ยังสร้างรูปเดิมได้ทุกไบต์ (`test_reproduce.py`)

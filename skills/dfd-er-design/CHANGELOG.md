@@ -1,4 +1,15 @@
 # Changelog
+## 2026-11-05 (3.4)
+- Level 1 default (store_mode single) is now compact: all stores in ONE column right next to the processes; flows from
+  other processes enter the store's TOP or BOTTOM edge through nested right rails (store box lengthened to its last rail);
+  entity flows to later processes leave the entity's left edge into left rails. Same minimum copies, 0 crossings, no jumps.
+  booking 23.2 x 17.9 in -> 11.3 x 16.9 in; v3.3 layout kept as "store_mode": "columns"
+- New worked example + test examples/library (library system, 3 entities, 5 stores, 7 processes): 11.9 x 14.7 in,
+  7 store boxes (D2, D4 copied once), entities once, 0 crossings
+- check_vsdx.py prints drawing size and empty-area ratio; WARN when a DFD with stores is wider than 1.7 x height or 16 in,
+  or more than 60% empty
+- templates/generator/test_examples.py: builds booking + library, requires finalize 0, check_vsdx OK, entities once,
+  <= 1 copy per store, width <= 1.7 x height
 ## 2026-11-05 (3.3)
 - Smaller arrowheads by default in every DFD (Visio Begin/EndArrowSize 0, PNG 0.075 x 0.06 in); spec key "arrow": "legacy"
   keeps the old size (examples/spare_part.json uses it, so the submitted report figures still reproduce byte-identical)

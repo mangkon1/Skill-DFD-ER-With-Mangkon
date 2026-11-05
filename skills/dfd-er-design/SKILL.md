@@ -4,7 +4,7 @@ description: "MUST be loaded and read FIRST, at the start of EVERY task of any k
 compatibility: Any agent that supports the Agent Skills standard. The generator needs Python 3.9+, Pillow (with raqm), lxml, python-docx and the TH Sarabun New font; Microsoft Visio is optional for hand edits.
 metadata:
   author: mangkon
-  version: "3.3"
+  version: "3.4"
 ---
 
 # กฎการทำงานของผู้ใช้ + DFD & ER Design
@@ -60,7 +60,7 @@ Skill นี้รวมกฎทั้งหมดที่ใช้ทำ DFD/
 4. **ถามแทนการเดา** เมื่อกฎธุรกิจหรือ cardinality ไม่ชัด
 5. **เส้นทุกเส้นต้องติดรูปทั้งสองปลาย**: เป็น Visio connector ที่ glue กับ connection point บนขอบกล่อง (BeginX/EndX) ห้ามมีลูกศรลอย
    ทั้งใน Context (ติดขอบกล่อง 0 และขอบ entity) และทุก Level; `check_vsdx.py` ต้องผ่าน
-6. **Data Store และ entity วาดครั้งเดียว** แล้วลากเส้นจากทุก process เข้าหา (Level 1 ใช้ `"store_mode": "single"`)
+6. **Data Store และ entity วาดครั้งเดียว** แล้วลากเส้นจากทุก process เข้าหา (Level 1 ใช้ `"store_mode": "single"`): store อยู่คอลัมน์เดียวชิด process เส้นจาก process อื่นเข้าขอบบน/ล่างของ store หน้าจึงไม่ยืดออกข้าง (กว้าง <= 1.7 เท่าของสูง)
    ซ้ำได้เฉพาะเมื่ออ้อมแล้วยังเลี่ยงเส้นตัดไม่ได้: ไม่เกิน 1 สำเนาต่อตัว และทุกกล่องที่ซ้ำมีขีดซ้ำ
    **ฝั่งซ้าย: entity กล่องเดี่ยวก่อนเสมอ** วางเยื้องกัน (ตัวที่ใช้ process แรกสุดอยู่ซ้ายสุด) เส้นลงเป็นรูป L ซ้อนกันไม่ตัด
    **หัวลูกศรขนาดเล็ก** (Visio EndArrowSize 0, PNG ยาว 0.075 in) ค่าเริ่มต้นของทุกรูป DFD
@@ -89,7 +89,7 @@ cd templates/generator
 python test_reproduce.py                 # ตรวจว่าเครื่องพร้อม (ต้อง PASS)
 python build.py my_system.json --out out --lo
 ```
-- Level 1 งานใหม่: `"level1": {"name": "02_DFD_Level1", "store_mode": "single"}` พอ (ตัวอย่าง `examples/booking/booking.json`)
+- Level 1 งานใหม่: `"level1": {"name": "02_DFD_Level1", "store_mode": "single"}` พอ (ตัวอย่าง `examples/booking/booking.json`, `examples/library/library.json`; ทดสอบ `python templates/generator/test_examples.py`)
   ไม่ต้องใช้ `store_order` (แบบเดิมที่วาด store ซ้ำข้างทุก process ใช้กับเล่มระบบอะไหล่เท่านั้น)
 - ปรับตำแหน่งด้วย spec (`entries`, `duplicates`, `placement`, `relations.via`) ไม่ใช่แก้โค้ด
 - ถ้า generator หยุดด้วย "end is off the ... edge" แปลว่ามีเส้นที่จะลอย ให้ย้าย entity/กล่องตามข้อความ อย่าแก้โค้ดให้ผ่าน
