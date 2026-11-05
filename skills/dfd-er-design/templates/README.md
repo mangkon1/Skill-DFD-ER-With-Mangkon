@@ -59,6 +59,15 @@ python ../sql/dd_to_sql.py ../dd/dd_spare_part.json > out/schema.sql
 7. รัน `check_spec.py` → `build.py` จนผลเป็น 0 ทุกตัว → ดูรูปด้วยตา → `check_vsdx.py`
 8. ถ้าต้องขยับนิดหน่อย เปิด .vsdx ใน Visio แก้ได้ (shape เป็น group ที่ DisplayMode = 1 แล้ว) แต่ให้แก้ spec ด้วยเพื่อสร้างซ้ำได้
 
+## Level 1 หน้าแคบ: column-rails (ทางเลือก ไม่ใช่ค่าเริ่มต้น)
+
+```json
+"level1": {"name": "02_DFD_Level1", "layout": "column-rails"}
+```
+- กล่อง entity/store อยู่ข้าง process, เส้นไกลวิ่งในรางขนานด้านนอก, ซ้ำกล่องเท่าที่ต้องเพื่อให้กว้าง ≤ `max_width` 6.0 in, เส้นตัด 0
+- build พิมพ์จำนวนกล่อง store/entity, ตัวที่ซ้ำ, จำนวนราง; ตรวจด้วย `check_vsdx.py --max-copies 0`
+- ตัวอย่าง `../examples/booking/booking_rails.json` (5.85 x 12.31 in)
+
 ## Level 1 งานใหม่: store เดียว
 
 ```json
@@ -67,8 +76,7 @@ python ../sql/dd_to_sql.py ../dd/dd_spare_part.json > out/schema.sql
 ```
 
 - ไม่ต้องใส่ `store_order` / `entries` (สร้างให้อัตโนมัติ); ใส่ `entries`, `entity_order`, `entity_left`, `lane_from` ได้ถ้าต้องจัดเอง
-- `duplicates`: `"auto"` (ค่าเริ่มต้น ซ้ำเมื่อช่วยลดเส้นตัด/ความยาว ≥ `dup_min_gain` 4), `"none"`, หรือ `{"D4": ["7.0", "8.0"]}`
-- `store_column`: บังคับลำดับ store บนลงล่าง (ไม่ใส่ = เรียงตามตำแหน่งเฉลี่ยของ process ที่ใช้)
-- build พิมพ์ "stores drawn N, duplicated [...], channel crossings K" ต้องอธิบายได้ทุกตัวที่ซ้ำ
-- ตัวอย่าง: `../examples/booking/booking.json` (8 process, 5 store: ถ้าห้ามซ้ำจะมีเส้นตัด 76 จุด; auto ซ้ำ store ละ 1 สำเนาเหลือ 5 จุดเป็น line jump)
+- `duplicates`: `"auto"` (ค่าเริ่มต้น: จำนวนสำเนาน้อยที่สุดที่ไม่มีเส้นตัด ไม่เกิน 1 สำเนาต่อ store), `"none"` (error ถ้าต้องตัด), หรือ `{"D4": ["7.0", "8.0"]}`
+- build พิมพ์ "store boxes N (stores M), duplicated [...], crossings 0 by construction"; ห้ามเส้นตัดและห้าม line jump (build error ถ้า cross > 0)
+- ตัวอย่าง: `../examples/booking/booking.json` (8 process, 5 store: 8 กล่อง ซ้ำ D2 D3 D5 ตัวละ 1 สำเนา ซึ่งพิสูจน์แล้วว่าน้อยที่สุด เส้นตัด 0)
 - spec แบบเดิมที่มี `store_order` (เล่มระบบอะไหล่) ยังสร้างรูปเดิมได้ทุกไบต์ (`test_reproduce.py`)

@@ -4,7 +4,7 @@ description: "MUST be loaded and read FIRST, at the start of EVERY task of any k
 compatibility: Any agent that supports the Agent Skills standard. The generator needs Python 3.9+, Pillow (with raqm), lxml, python-docx and the TH Sarabun New font; Microsoft Visio is optional for hand edits.
 metadata:
   author: mangkon
-  version: "3.1"
+  version: "3.3"
 ---
 
 # กฎการทำงานของผู้ใช้ + DFD & ER Design
@@ -61,7 +61,10 @@ Skill นี้รวมกฎทั้งหมดที่ใช้ทำ DFD/
 5. **เส้นทุกเส้นต้องติดรูปทั้งสองปลาย**: เป็น Visio connector ที่ glue กับ connection point บนขอบกล่อง (BeginX/EndX) ห้ามมีลูกศรลอย
    ทั้งใน Context (ติดขอบกล่อง 0 และขอบ entity) และทุก Level; `check_vsdx.py` ต้องผ่าน
 6. **Data Store และ entity วาดครั้งเดียว** แล้วลากเส้นจากทุก process เข้าหา (Level 1 ใช้ `"store_mode": "single"`)
-   ซ้ำได้เฉพาะเมื่อกล่องเดียวทำให้เกิดเส้นตัดที่เลี่ยงไม่ได้ เส้นยาวมาก หรือรก: ไม่เกิน 1 สำเนาต่อตัว และทุกกล่องที่ซ้ำมีขีดซ้ำ
+   ซ้ำได้เฉพาะเมื่ออ้อมแล้วยังเลี่ยงเส้นตัดไม่ได้: ไม่เกิน 1 สำเนาต่อตัว และทุกกล่องที่ซ้ำมีขีดซ้ำ
+   **ฝั่งซ้าย: entity กล่องเดี่ยวก่อนเสมอ** วางเยื้องกัน (ตัวที่ใช้ process แรกสุดอยู่ซ้ายสุด) เส้นลงเป็นรูป L ซ้อนกันไม่ตัด
+   **หัวลูกศรขนาดเล็ก** (Visio EndArrowSize 0, PNG ยาว 0.075 in) ค่าเริ่มต้นของทุกรูป DFD
+   **ห้ามเส้นตัดกันและห้ามเส้นค่อม (line jump) เด็ดขาด** ทุกรูป ให้อ้อมไปด้านหลังแทน ห้ามเส้นผ่านกล่องหรือป้าย
 7. **ภาษาไทยต้องอ่านถูก**: ฟอนต์จาก template (TH Sarabun New หรือ Tahoma) ข้อความ UTF-8 และเปิด PNG ตรวจว่าสระ/วรรณยุกต์ไม่หาย ไม่ลอย
 8. **ไฟล์ของผู้ใช้สำคัญที่สุด**: สำรองก่อนแก้ ตรวจว่าผู้ใช้แก้ไฟล์หลังเราหรือไม่ (เวลาแก้ไข, ไฟล์ล็อก `~$`) แล้วต่อยอดจากฉบับของผู้ใช้ แก้เฉพาะส่วนที่ได้รับมอบหมาย
 
@@ -97,7 +100,7 @@ python build.py my_system.json --out out --lo
 - ผล finalize ต้องเป็น 0 ทั้ง 5 ค่าในทุกรูป
 - `python templates/tools/check_vsdx.py out/vsdx/*.vsdx` ต้องผ่าน (DisplayMode = 1, ER 1 เส้นต่อคู่, ไม่มีปลายเส้นลอย/ไม่ glue,
   store/entity ไม่เกิน 2 กล่อง) และอ่าน WARN จำนวนที่ซ้ำทุกบรรทัด
-- `cross` ของ Level 1 แบบ store เดียวต้องน้อยที่สุดและเป็น line jump ค่าอื่นของ finalize ต้องเป็น 0
+- `cross` ต้องเป็น 0 ทุกรูป (ห้าม line jump) check_vsdx ต้องรายงาน `crossings=0` และไม่มี "passes through"
 - เปิด PNG ดูด้วยตาทุกรูป: กล่องกลวง ตัวอักษรไม่ถูกบัง หัว ER สีฟ้า `#BDD7EE` ป้ายไม่ทับ ลูกศรติดกล่องทุกเส้น store ไม่ซ้ำเกินจำเป็น
   สระ/วรรณยุกต์ไทยถูกที่ (ข้อผิดพลาดที่เคยเกิด: `docs/checklist.md` ส่วน E)
 - ไล่ `docs/checklist.md` ส่วน A และ B

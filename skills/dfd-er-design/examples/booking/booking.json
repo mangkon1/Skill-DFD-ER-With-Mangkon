@@ -302,7 +302,6 @@
     "name": "02_DFD_Level1",
     "store_mode": "single",
     "label_pt": 14,
-    "duplicates": "auto",
     "layout": {
       "SH": 0.36,
       "PW": 2.15,

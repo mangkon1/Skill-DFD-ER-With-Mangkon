@@ -17,6 +17,7 @@ Skill สำหรับออกแบบ วาด ตรวจ และใ�
 - **ตัวสร้างรูป** (Python) ที่อ่าน spec JSON แล้วสร้าง .vsdx + .png ตรงกับต้นฉบับทุกไบต์ พร้อม test
 - **เครื่องมือตรวจ**: CRUD matrix, balancing, black hole/miracle, FK ↔ เส้น ER, ไฟล์ Visio (v3.1: FAIL ถ้ามีลูกศรลอย/ไม่ glue, store/entity ซ้ำเกิน 1 สำเนา)
 - **v3.1**: Level 1 แบบ store เดียว (`"store_mode": "single"`) วาด store ละครั้งแล้วลากเส้นเข้า ซ้ำเฉพาะเมื่อจำเป็น, ภาษาไทยใน PNG ไม่เพี้ยนแม้ไม่มี libraqm, ตัวอย่าง `examples/booking`
+- **v3.3**: ไม่มีเส้นตัด/เส้นค่อม (line jump) ทุกรูป, entity ฝั่งซ้ายกล่องเดี่ยวเยื้องกันเป็นรูป L ซ้อน, store ซ้ำน้อยที่สุดเท่าที่ต้อง, หัวลูกศรเล็ก, check_vsdx FAIL ทุกจุดตัด
 - **Data Dictionary** แม่แบบ .docx รูปแบบเดียวกับเล่ม และตัวสร้าง SQL DDL สำหรับ MariaDB
 
 ```

@@ -1,4 +1,24 @@
 # Changelog
+## 2026-11-05 (3.3)
+- Smaller arrowheads by default in every DFD (Visio Begin/EndArrowSize 0, PNG 0.075 x 0.06 in); spec key "arrow": "legacy"
+  keeps the old size (examples/spare_part.json uses it, so the submitted report figures still reproduce byte-identical)
+- Level 1 default (store_mode single): entities drawn ONCE on the left, staggered, nested L-shaped lanes; an entity gets one
+  copy only when its process set interlaces another's (last resort, searched automatically); port order inside a process
+  fixed so lanes never cross (lanes from above first, inner entity on top)
+- Includes the 3.2 work below (no crossings / no line jumps, planar stores with minimum copies, stricter check_vsdx)
+- column-rails stays available as an option but is not the default (it duplicates entities)
+## 2026-11-05 (3.2)
+- Hard rule: no crossing lines and no line jumps in any diagram; detour around instead. build.py fails on any cross; hop
+  drawing removed (PNG) and Visio LineJumpCode is always 0
+- d_l1s.py rewritten as a planar layout: store blocks nested by process span (wider blocks in further columns, lines detour
+  around inner blocks), exhaustive search for the fewest store copies (max 1 per store) with zero crossings; booking: 8 boxes
+  (D2, D3, D5 copied once; proven minimum for one process column), 0 crossings
+- New Level 1 layout "column-rails" (d_l1r.py, instructor reference style, A4 portrait): entity/store boxes beside the
+  processes, long flows in nested parallel side rails, copies merged greedily while planar and page width <= max_width
+  (6.0 in); booking: 5.85 x 12.31 in, 8 store boxes, 8 entity boxes, 13 rail lines, 0 crossings. Shape options iw (store id
+  column) and hh (process number band) added with the old defaults (legacy output byte-identical)
+- check_vsdx.py FAILS on any two connectors whose segments intersect/touch, any connector through a shape, and any connector
+  through another connector's label; prints crossings=N per page
 ## 2026-11-05 (3.1)
 - Hard rule: every flow has both ends glued to a connection point on a shape edge. The generator raises an error on any end
   off a shape edge; the Context builder grows the system box so every arrow starts/ends on it (fixes floating arrows)
