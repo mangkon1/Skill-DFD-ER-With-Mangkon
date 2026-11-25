@@ -1,0 +1,10 @@
+---
+description: Always read the thai-reply skill FIRST (before dfd-er-design and any other work) and reply to the user in Thai, in every task.
+alwaysApply: true
+---
+
+ก่อนทำอย่างอื่นในทุกงานและทุก session ให้อ่านและทำตาม `SKILL.md` ของ skill **thai-reply** เป็นอันดับแรก (ก่อน dfd-er-design)
+และตอบผู้ใช้เป็นภาษาไทยทุกครั้ง ไม่ว่าผู้ใช้จะพิมพ์ภาษาอะไร (โค้ด คำสั่ง path URL และ error ที่ยกมาคงรูปเดิม)
+(Read and follow the `thai-reply` skill FIRST in every task, before dfd-er-design: always reply to the user in Thai.)
+
+ตำแหน่ง: `~/.cursor/skills/thai-reply/SKILL.md` หรือ `skills/thai-reply/SKILL.md` ในโปรเจกต์

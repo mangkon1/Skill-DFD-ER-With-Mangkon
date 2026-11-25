@@ -4,6 +4,9 @@
 > กฎทั่วไป (ตอบภาษาไทย สำรองก่อนแทนที่ ไม่ทับงานผู้ใช้ ตรวจไฟล์ล็อก `~$` ตรวจผล ใช้ของที่มีอยู่ก่อน)
 > + Step 0 ตรวจชุดเครื่องมือ (Ponytail, Graphify, Anthropic document-skills) + กฎ DFD/ER ทั้งหมด
 
+> **v3.5: เพิ่ม skill ที่สอง `thai-reply`** ให้ AI ทุกตัว (Claude Code, Cursor, Codex ฯลฯ) ตอบเป็นภาษาไทยเสมอ และโหลด **เป็นอันดับแรก** ก่อน `dfd-er-design`
+> (โค้ด คำสั่ง path URL และ error ที่ยกมาคงรูปเดิม; ถ้าสั่งให้เขียนผลงานเป็นภาษาอื่น ตัวผลงานใช้ภาษานั้น แต่คุยรอบ ๆ ยังเป็นไทย) ดู [skills/thai-reply/SKILL.md](skills/thai-reply/SKILL.md)
+
 Skill สำหรับออกแบบ วาด ตรวจ และใส่รูปเล่ม **Context Diagram, DFD Level 1/2, ER Diagram (Crow's Foot), Data Dictionary และ MariaDB DDL**
 ตามหลัก "ข้อมูลต้องมีที่มาที่ไป" สำหรับรายงานโครงงาน/ปริญญานิพนธ์ภาษาไทย ใช้รูปแบบ [Agent Skills](https://agentskills.io)
 จึงติดตั้งจาก URL เดียวกันได้กับตัวช่วย AI ที่รองรับสกิล เช่น Cursor, Claude Code, Codex, Gemini CLI, GitHub Copilot, Windsurf, Cline และตัวอื่นที่ตัวติดตั้งรองรับ
@@ -22,6 +25,7 @@ Skill สำหรับออกแบบ วาด ตรวจ และใ�
 - **Data Dictionary** แม่แบบ .docx รูปแบบเดียวกับเล่ม และตัวสร้าง SQL DDL สำหรับ MariaDB
 
 ```
+skills/thai-reply/SKILL.md     ตอบผู้ใช้เป็นภาษาไทยเสมอ (โหลดเป็นอันดับแรกทุกงาน)
 skills/dfd-er-design/
   SKILL.md                     ส่วนที่ 1 กฎทั่วไป + Step 0 (ทุกงาน), ส่วนที่ 2 workflow DFD/ER
   docs/                        toolchain, principles, dfd-style, er-style, report-insertion, checklist
@@ -29,8 +33,8 @@ skills/dfd-er-design/
   examples/spare_part_design.md   สรุปการออกแบบตัวอย่าง (14 ตาราง)
   references/chapter3_example.docx บทที่ 3 ฉบับจริง
   evals/                       test prompts
-install.ps1 / install.sh       ติดตั้งแบบ global + เพิ่มคำสั่ง "อ่าน skill นี้ก่อนทุกงาน"
-CLAUDE.md, AGENTS.md, .cursor/rules/load-dfd-er-design.mdc   bootstrap เมื่อทำงานในรีโปนี้
+install.ps1 / install.sh       ติดตั้งทั้ง 2 skill แบบ global + เพิ่มคำสั่ง "อ่าน thai-reply ก่อน แล้ว dfd-er-design ก่อนทุกงาน"
+CLAUDE.md, AGENTS.md, .cursor/rules/00-load-thai-reply.mdc + load-dfd-er-design.mdc   bootstrap เมื่อทำงานในรีโปนี้
 ```
 
 ## ชุดเครื่องมือที่ skill แนะนำ (Step 0)
@@ -47,25 +51,29 @@ CLAUDE.md, AGENTS.md, .cursor/rules/load-dfd-er-design.mdc   bootstrap เมื
 
 ## ติดตั้งให้ทุก AI
 
-คำสั่งนี้ติดตั้ง skill `dfd-er-design` ทั้งเครื่อง ให้ทุกตัวช่วยที่ตรวจพบ โดยไม่ต้องตอบคำถามเพิ่ม
+คำสั่งนี้ติดตั้ง skill `thai-reply` และ `dfd-er-design` ทั้งเครื่อง ให้ทุกตัวช่วยที่ตรวจพบ โดยไม่ต้องตอบคำถามเพิ่ม
 
 ```bash
+npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill thai-reply --agent '*' -g -y
 npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill dfd-er-design --agent '*' -g -y
 ```
+
+(คำสั่ง `npx skills` ติดตั้งแค่ตัว skill; ให้ AI โหลด thai-reply เป็นอันดับแรกทุกงานต้องใช้ไฟล์ bootstrap ในหัวข้อ "บังคับให้อ่าน" ด้านล่าง หรือรัน `install.ps1` / `install.sh`)
 
 เปิดแชทใหม่หลังติดตั้ง แล้วบอกให้ช่วยออกแบบหรือตรวจ DFD, ER Diagram หรือ Data Dictionary
 
 ติดตั้งเฉพาะโปรเจกต์ปัจจุบัน โดยไม่ใส่ `-g`
 
 ```bash
+npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill thai-reply --agent '*' -y
 npx skills add https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon --skill dfd-er-design --agent '*' -y
 ```
 
-ใน Cursor ติดตั้งจากหน้าจอได้เช่นกัน เปิด Customize แล้วเลือกนำเข้าจาก GitHub repository จากนั้นวาง `https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon` แล้วติดตั้ง plugin `dfd-er-design`
+ใน Cursor ติดตั้งจากหน้าจอได้เช่นกัน เปิด Customize แล้วเลือกนำเข้าจาก GitHub repository จากนั้นวาง `https://github.com/mangkon1/Skill-DFD-ER-With-Mangkon` แล้วติดตั้ง plugin `dfd-er-design` (มีทั้ง 2 skill)
 
-ติดตั้งเอง: คัดลอกโฟลเดอร์ `skills/dfd-er-design` ไปไว้ในโฟลเดอร์ skills ของเครื่องมือที่ใช้ (เช่น `~/.cursor/skills/`, `~/.claude/skills/`)
+ติดตั้งเอง: คัดลอกโฟลเดอร์ `skills/thai-reply` และ `skills/dfd-er-design` ไปไว้ในโฟลเดอร์ skills ของเครื่องมือที่ใช้ (เช่น `~/.cursor/skills/`, `~/.claude/skills/`)
 
-## บังคับให้อ่าน skill นี้ก่อนทุกงาน
+## บังคับให้อ่าน skill ก่อนทุกงาน (thai-reply อันดับแรก แล้ว dfd-er-design)
 
 ตามมาตรฐาน Agent Skills ตัวช่วย AI เลือกโหลด skill จาก `description` เอง **จึงบังคับ 100% ด้วย skill อย่างเดียวไม่ได้**
 description ของ v3 เขียนว่า MUST load ก่อนทุกงานแล้ว แต่ให้ได้ผลจริงต้องเพิ่มคำสั่งในไฟล์ที่ตัวช่วยโหลด **ทุก session เสมอ**:
@@ -74,10 +82,12 @@ description ของ v3 เขียนว่า MUST load ก่อนทุ�
 |---|---|---|
 | Claude Code | `~/.claude/CLAUDE.md` (ทุกโปรเจกต์) หรือ `CLAUDE.md` ในโปรเจกต์ | สคริปต์ติดตั้งเพิ่มให้ หรือวางข้อความจาก `templates/bootstrap/CLAUDE.md` |
 | Codex | `~/.codex/AGENTS.md` (ทุกโปรเจกต์) หรือ `AGENTS.md` ในโปรเจกต์ | สคริปต์ติดตั้งเพิ่มให้ หรือวางข้อความจาก `templates/bootstrap/AGENTS.md` |
-| Cursor | **User Rules** (Settings > Rules) ใช้ทุกโปรเจกต์; หรือ `.cursor/rules/load-dfd-er-design.mdc` (`alwaysApply: true`) ต่อโปรเจกต์; `AGENTS.md` ในโปรเจกต์ก็อ่าน | วางข้อความจาก `templates/bootstrap/cursor-user-rule.txt` ใน User Rules (สคริปต์ตั้งให้ไม่ได้ เพราะเก็บในค่าตั้งของแอป) |
+| Cursor | **User Rules** (Settings > Rules) ใช้ทุกโปรเจกต์; หรือ `.cursor/rules/00-load-thai-reply.mdc` + `load-dfd-er-design.mdc` (`alwaysApply: true`) ต่อโปรเจกต์; `AGENTS.md` ในโปรเจกต์ก็อ่าน | วางข้อความจาก `templates/bootstrap/cursor-user-rule.txt` ใน User Rules (สคริปต์ตั้งให้ไม่ได้ เพราะเก็บในค่าตั้งของแอป) |
 | ตัวอื่น (Gemini CLI, Copilot, Windsurf, Cline ฯลฯ) | ไฟล์กฎ/instructions ของตัวนั้น | วางข้อความเดียวกับ `templates/bootstrap/AGENTS.md` |
 
-ติดตั้งแบบ global ในคำสั่งเดียว (คัดลอก skill ไป `~/.claude/skills`, `~/.cursor/skills`, `~/.agents/skills`
+ข้อความ bootstrap มี 2 บล็อก เรียงตามลำดับที่ต้องอ่าน: บล็อก `thai-reply` (ตอบภาษาไทยเสมอ) อยู่บนสุด แล้วจึงบล็อก `dfd-er-design`
+
+ติดตั้งแบบ global ในคำสั่งเดียว (คัดลอกทั้ง 2 skill ไป `~/.claude/skills`, `~/.cursor/skills`, `~/.agents/skills`
 แล้วเพิ่มข้อความ bootstrap ใน `~/.claude/CLAUDE.md` และ `~/.codex/AGENTS.md` แบบเพิ่มครั้งเดียว สำรองไฟล์เดิมก่อน):
 
 ```powershell
@@ -89,7 +99,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1          # ลองก�
 bash install.sh                                                   # ลองก่อนด้วย --dry-run
 ```
 
-- รันซ้ำได้: ข้อความ bootstrap มี marker `dfd-er-design:bootstrap:start` จะไม่เพิ่มซ้ำ
+- รันซ้ำได้: ข้อความ bootstrap มี marker `thai-reply:bootstrap:start` และ `dfd-er-design:bootstrap:start` จะไม่เพิ่มซ้ำ; ถ้าเครื่องมีบล็อก dfd-er-design เดิมอยู่แล้ว สคริปต์แทรกบล็อก thai-reply ไว้ก่อน (ไม่แก้ข้อความอื่นของผู้ใช้)
 - สำรอง: `CLAUDE.md`/`AGENTS.md` เดิม → `*.bak-<เวลา>`; skill เดิม → `~/.dfd-er-design-backup/<เวลา>/`
 - สคริปต์ **ไม่ติดตั้ง** Ponytail / Graphify / document-skills ให้ (ดู docs/toolchain.md)
 - ข้อจำกัด: ทุกวิธีเป็น "คำสั่งที่โหลดเข้าบริบททุก session" AI ยังอาจข้ามได้ถ้าคำสั่งของผู้ใช้ในแชทขัดกัน และมีผลหลังเปิด session ใหม่

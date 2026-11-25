@@ -1,4 +1,10 @@
 # Changelog
+## 2026-11-25 (repo 3.5.0; dfd-er-design itself unchanged at 3.4)
+- New second skill skills/thai-reply: always reply to the user in Thai (code, commands, paths, URLs, quoted errors kept
+  verbatim; deliverables explicitly requested in another language stay in that language)
+- Bootstrap loads thai-reply FIRST, then dfd-er-design: CLAUDE.md / AGENTS.md (two marker blocks, thai-reply on top),
+  .cursor/rules/00-load-thai-reply.mdc (alwaysApply), cursor-user-rule.txt; install.ps1 / install.sh install both skills to
+  ~/.claude/skills, ~/.cursor/skills, ~/.agents/skills and insert the thai-reply block before an existing dfd-er-design block
 ## 2026-11-05 (3.4)
 - Level 1 default (store_mode single) is now compact: all stores in ONE column right next to the processes; flows from
   other processes enter the store's TOP or BOTTOM edge through nested right rails (store box lengthened to its last rail);
